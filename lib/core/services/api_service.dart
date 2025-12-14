@@ -1,0 +1,42 @@
+import 'package:dio/dio.dart';
+
+// ivan
+class ApiService {
+  late Dio _dio;
+
+  ApiService({String? token}) {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: "http://10.0.2.2:8000/api",
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),
+        headers: {
+          'Accept': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+  }
+  Future<Response> get(String endpoint) async {
+    try {
+      return await _dio.get(endpoint);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Response> post(String endpoint, dynamic data) async {
+    try {
+      return await _dio.post(endpoint, data: data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Exception _handleError(DioException e) {
+    if (e.response != null) {
+      return Exception(e.response?.data['message'] ?? 'Server error');
+    }
+    return Exception('Connection error');
+  }
+}
