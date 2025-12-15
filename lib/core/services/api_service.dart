@@ -17,6 +17,8 @@ class ApiService {
       ),
     );
   }
+
+  // ivan
   Future<Response> get(String endpoint) async {
     try {
       return await _dio.get(endpoint);
@@ -25,6 +27,7 @@ class ApiService {
     }
   }
 
+  // ivan
   Future<Response> post(String endpoint, dynamic data) async {
     try {
       return await _dio.post(endpoint, data: data);
@@ -33,10 +36,29 @@ class ApiService {
     }
   }
 
+  // ivan
   Exception _handleError(DioException e) {
     if (e.response != null) {
       return Exception(e.response?.data['message'] ?? 'Server error');
     }
     return Exception('Connection error');
+  }
+
+  // ivan
+  Future<Response> put(String endpoint, dynamic data) async {
+    try {
+      return await _dio.put(endpoint, data: data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // ivan
+  Future<Response> delete(String endpoint) async {
+    try {
+      return await _dio.delete(endpoint);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
   }
 }

@@ -56,10 +56,8 @@ class _LostListScreenState extends State<LostListScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => LostDetailScreen(
-                        repo: widget.repo,
-                        id: lost.id,
-                      ),
+                      builder: (_) =>
+                          LostDetailScreen(repo: widget.repo, id: lost.id),
                     ),
                   );
                 },

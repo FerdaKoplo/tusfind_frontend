@@ -25,15 +25,12 @@ class ItemRepository {
     String? brand,
     String? color,
   }) async {
-    final response = await api.post(
-      '/items',
-      {
-        'name': name,
-        'category_id': categoryId,
-        'brand': brand,
-        'color': color,
-      },
-    );
+    final response = await api.post('/items', {
+      'name': name,
+      'category_id': categoryId,
+      'brand': brand,
+      'color': color,
+    });
 
     return Item.fromJson(response.data['data']);
   }
