@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/models/item_found_model.dart';
 import 'package:tusfind_frontend/core/repositories/category_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
@@ -46,25 +47,45 @@ class _FoundListScreenState extends State<FoundListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Found Items'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              final refresh = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => FoundFormScreen(
-                    repo: widget.repo,
-                    categoryRepo: CategoryRepository(widget.repo.api),
-                    itemRepo: ItemRepository(widget.repo.api),
-                  ),
-                ),
-              );
-              if (refresh == true) _load();
-            },
-          ),
-        ],
+        backgroundColor: AppColor.primaryLight,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          spacing: 10,
+          children: const [
+            Icon(Icons.find_in_page, color: Colors.white, size: 25),
+            Text(
+              'Laporan Penemuan Barang',
+              style: TextStyle(
+                color: Colors.white,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ), // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.add),
+        //     onPressed: () async {
+        //       final refresh = await Navigator.push(
+        //         context,
+        //         MaterialPageRoute(
+        //           builder: (_) => FoundFormScreen(
+        //             repo: widget.repo,
+        //             categoryRepo: CategoryRepository(widget.repo.api),
+        //             itemRepo: ItemRepository(widget.repo.api),
+        //           ),
+        //         ),
+        //       );
+        //       if (refresh == true) _load();
+        //     },
+        //   ),
+        // ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -75,7 +96,7 @@ class _FoundListScreenState extends State<FoundListScreen> {
               itemBuilder: (_, index) {
                 final item = _items[index];
                 return ItemReportCard(
-                  title: item.item.name,
+                  title: item.item?.name ?? '-',
                   subtitle: item.foundLocation ?? '-',
                   status: item.status,
                   onTap: () async {
@@ -91,6 +112,26 @@ class _FoundListScreenState extends State<FoundListScreen> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColor.primaryLight,
+        onPressed: () async {
+          final created = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FoundFormScreen(
+                repo: widget.repo,
+                categoryRepo: CategoryRepository(widget.repo.api),
+                itemRepo: ItemRepository(widget.repo.api),
+              ),
+            ),
+          );
+
+          if (created == true) {
+            _load();
+          }
+        },
+        child: const Icon(Icons.add, color: Colors.white,),
+      ),
     );
   }
 }

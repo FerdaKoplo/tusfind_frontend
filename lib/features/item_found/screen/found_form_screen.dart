@@ -40,6 +40,9 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
   bool _loading = false;
   bool _loadingItems = false;
 
+  String? _customItemName;
+  bool _useCustomItem = false;
+
   bool get isEdit => widget.existing != null;
 
   @override
@@ -49,9 +52,9 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
   }
 
   Future<void> _initData() async {
-    // Fetch categories and items
     final categories = await widget.categoryRepo.getCategories();
     final items = await widget.itemRepo.getItems();
+
 
     setState(() {
       _categories = categories;
@@ -66,6 +69,11 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
       _description = found.description;
 
       _filterItems(_categoryId);
+
+      if (found.item == null && found.customItemName != null) {
+        _useCustomItem = true;
+        _customItemName = found.customItemName;
+      }
     }
   }
 
@@ -94,22 +102,24 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
           widget.existing!.id,
           categoryId: _categoryId,
           itemId: _itemId,
+          customItemName: _customItemName,
           foundLocation: _location,
           description: _description,
         );
       } else {
         await widget.repo.createFoundItem(
           categoryId: _categoryId!,
-          itemId: _itemId!,
+          itemId: _itemId,
+          customItemName: _customItemName,
           foundLocation: _location,
           description: _description,
         );
       }
-
       Navigator.pop(context, true);
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => _loading = false);
     }
@@ -132,11 +142,8 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
                 decoration: const InputDecoration(labelText: 'Category'),
                 items: _categories
                     .map(
-                      (c) => DropdownMenuItem(
-                    value: c.id,
-                    child: Text(c.name),
-                  ),
-                )
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    )
                     .toList(),
                 onChanged: (v) {
                   _categoryId = v;
@@ -147,45 +154,71 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
               const SizedBox(height: 12),
 
               DropdownButtonFormField<int>(
-                value: _itemId,
+                initialValue: _itemId,
                 decoration: const InputDecoration(labelText: 'Item'),
-                items: _filteredItems
-                    .map(
-                      (i) => DropdownMenuItem(
-                    value: i.id,
-                    child: Text(i.name),
+                items: [
+                  ..._filteredItems.map(
+                    (i) => DropdownMenuItem(value: i.id, child: Text(i.name)),
                   ),
-                )
-                    .toList(),
-                onChanged: _loadingItems ? null : (v) => setState(() => _itemId = v),
-                validator: (v) => v == null ? 'Select item' : null,
+                  const DropdownMenuItem<int>(
+                    value: -1,
+                    child: Text('Other / Not in list'),
+                  ),
+                ],
+                onChanged: _loadingItems
+                    ? null
+                    : (value) {
+                        setState(() {
+                          if (value == -1) {
+                            _itemId = null;
+                            _useCustomItem = true;
+                          } else {
+                            _itemId = value;
+                            _useCustomItem = false;
+                            _customItemName = null;
+                          }
+                        });
+                      },
+                validator: (v) =>
+                    v == null && !_useCustomItem ? 'Select item' : null,
               ),
+
+              if (_useCustomItem)
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Item name'),
+                  validator: (v) {
+                    if (_useCustomItem && (v == null || v.isEmpty)) {
+                      return 'Item name is required';
+                    }
+                    return null;
+                  },
+                  onSaved: (v) => _customItemName = v,
+                ),
+
               const SizedBox(height: 12),
 
               TextFormField(
                 initialValue: _location,
                 decoration: const InputDecoration(labelText: 'Found Location'),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                onSaved: (v) => _location = v,
+                onSaved: (v) => _location = v ?? '',
               ),
-              const SizedBox(height: 12),
 
               TextFormField(
                 initialValue: _description,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
-                onSaved: (v) => _description = v,
+                onSaved: (v) => _description = v ?? '',
               ),
-              const SizedBox(height: 20),
 
               ElevatedButton(
                 onPressed: _loading ? null : _submit,
                 child: _loading
                     ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : Text(isEdit ? 'Update' : 'Submit'),
               ),
             ],

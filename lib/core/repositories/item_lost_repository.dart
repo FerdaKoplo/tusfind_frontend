@@ -1,7 +1,6 @@
 import 'package:tusfind_frontend/core/models/item_lost_model.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
 
-// ivan
 class ItemLostRepository {
   final ApiService api;
 
@@ -9,6 +8,7 @@ class ItemLostRepository {
 
   Future<List<ItemLost>> getLostItems() async {
     final response = await api.get('/lost-items');
+
     final List data = response.data['data'];
     return data.map((e) => ItemLost.fromJson(e)).toList();
   }
@@ -20,14 +20,16 @@ class ItemLostRepository {
 
   Future<ItemLost> createLostItem({
     required int categoryId,
-    required int itemId,
+    int? itemId,
+    String? customItemName,
     String? lostDate,
     String? lostLocation,
     String? description,
   }) async {
     final response = await api.post('/lost-items', {
       'category_id': categoryId,
-      'item_id': itemId,
+      if (itemId != null) 'item_id': itemId,
+      if (customItemName != null) 'custom_item_name': customItemName,
       'lost_date': lostDate,
       'lost_location': lostLocation,
       'description': description,
@@ -37,16 +39,18 @@ class ItemLostRepository {
   }
 
   Future<ItemLost> updateLostItem(
-      int id, {
-        int? categoryId,
-        int? itemId,
-        String? lostDate,
-        String? lostLocation,
-        String? description,
-      }) async {
+    int id, {
+    int? categoryId,
+    int? itemId,
+    String? customItemName,
+    String? lostDate,
+    String? lostLocation,
+    String? description,
+  }) async {
     final response = await api.put('/lost-items/$id', {
       if (categoryId != null) 'category_id': categoryId,
       if (itemId != null) 'item_id': itemId,
+      if (customItemName != null) 'custom_item_name': customItemName,
       'lost_date': lostDate,
       'lost_location': lostLocation,
       'description': description,
@@ -56,6 +60,6 @@ class ItemLostRepository {
   }
 
   Future<void> deleteLostItem(int id) async {
-    await api.delete('/lost-items/$id');
+    await api.post('/item-losts/$id', {'_method': 'DELETE'});
   }
 }

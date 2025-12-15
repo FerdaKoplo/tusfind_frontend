@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tusfind_frontend/core/constants/colors.dart';
 
+// ivan
 class ItemReportCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -37,6 +39,7 @@ class ItemReportCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Card(
+        color: Colors.white,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -46,7 +49,6 @@ class ItemReportCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              // Status Indicator
               Container(
                 width: 10,
                 height: 50,
@@ -65,22 +67,27 @@ class ItemReportCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Row(
+                      children: [
+                        Icon( Icons.pin_drop, color: AppColor.primary,),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),

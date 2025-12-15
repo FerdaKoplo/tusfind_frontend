@@ -20,14 +20,16 @@ class ItemFoundRepository {
 
   Future<ItemFound> createFoundItem({
     required int categoryId,
-    required int itemId,
+    int? itemId,
+    String? customItemName,
     String? foundDate,
     String? foundLocation,
     String? description,
   }) async {
     final response = await api.post('/found-items', {
       'category_id': categoryId,
-      'item_id': itemId,
+      if (itemId != null) 'item_id': itemId,
+      if (customItemName != null) 'custom_item_name': customItemName,
       'found_date': foundDate,
       'found_location': foundLocation,
       'description': description,
@@ -40,6 +42,7 @@ class ItemFoundRepository {
     int id, {
     int? categoryId,
     int? itemId,
+    String? customItemName,
     String? foundDate,
     String? foundLocation,
     String? description,
@@ -47,6 +50,7 @@ class ItemFoundRepository {
     final response = await api.put('/found-items/$id', {
       if (categoryId != null) 'category_id': categoryId,
       if (itemId != null) 'item_id': itemId,
+      if (customItemName != null) 'custom_item_name': customItemName,
       'found_date': foundDate,
       'found_location': foundLocation,
       'description': description,

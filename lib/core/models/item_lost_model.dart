@@ -7,7 +7,7 @@ class ItemLost {
   final int id;
   final int userId;
   final int categoryId;
-  final int itemId;
+  final int? itemId;
   final String? lostDate;
   final String? lostLocation;
   final String? description;
@@ -15,12 +15,13 @@ class ItemLost {
   final Category? category;
   final Item? item;
   final List<ItemImage> images;
+  final String? customItemName;
 
   ItemLost({
     required this.id,
     required this.userId,
     required this.categoryId,
-    required this.itemId,
+    this.itemId,
     this.lostDate,
     this.lostLocation,
     this.description,
@@ -28,6 +29,7 @@ class ItemLost {
     this.category,
     this.item,
     required this.images,
+    this.customItemName,
   });
 
   factory ItemLost.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class ItemLost {
       lostLocation: json['lost_location'],
       description: json['description'],
       status: json['status'],
+      customItemName: json['custom_item_name'],
       category:
       json['category'] != null ? Category.fromJson(json['category']) : null,
       item: json['item'] != null ? Item.fromJson(json['item']) : null,
