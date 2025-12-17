@@ -68,7 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: phoneC,
                 decoration: InputDecoration(labelText: "No Telp"),
                 validator: (v) =>
-                    v == null || v.isEmpty ? "No Telp wajib" : null,
+                    v == null || v.isEmpty ? "No Telp wajib diisi" : null,
               ),
               TextFormField(
                 controller: passC,

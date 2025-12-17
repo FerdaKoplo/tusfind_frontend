@@ -44,14 +44,14 @@ class _LoginPageState extends State<LoginPage> {
                 controller: emailC,
                 decoration: InputDecoration(labelText: "Email"),
                 validator: (v) =>
-                    v == null || v.isEmpty ? "Email wajib" : null,
+                    v == null || v.isEmpty ? "Email wajib diisi" : null,
               ),
               TextFormField(
                 controller: passC,
                 obscureText: true,
                 decoration: InputDecoration(labelText: "Password"),
                 validator: (v) =>
-                    v == null || v.isEmpty ? "Password wajib" : null,
+                    v == null || v.isEmpty ? "Password wajib diisi" : null,
               ),
               SizedBox(height: 20),
               ElevatedButton(
