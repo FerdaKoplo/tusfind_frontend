@@ -62,4 +62,22 @@ class ItemLostRepository {
   Future<void> deleteLostItem(int id) async {
     await api.post('/item-losts/$id', {'_method': 'DELETE'});
   }
+
+  Future<List<ItemLost>> getMyLostItems({String? status, String? search}) async {
+    try {
+      final response = await api.get(
+        '/profile/lost-items',
+        queryParameters: {
+          if (status != null) 'status': status,
+          if (search != null) 'search': search,
+        },
+      );
+
+      final List data = response.data['data'];
+      return data.map((e) => ItemLost.fromJson(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

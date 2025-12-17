@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/models/category_model.dart';
 import 'package:tusfind_frontend/core/models/item_lost_model.dart';
 import 'package:tusfind_frontend/core/models/item_model.dart';
 import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
 import 'package:tusfind_frontend/core/repositories/category_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_repository.dart';
+import 'package:tusfind_frontend/core/widgets/app_bar.dart';
 
 // ivan
 class LostFormScreen extends StatefulWidget {
@@ -45,18 +47,12 @@ class _LostFormScreenState extends State<LostFormScreen> {
 
   Future<void> _loadData() async {
     final api = widget.repo.api;
-
     final categoryRepo = CategoryRepository(api);
     final itemRepo = ItemRepository(api);
 
     try {
-      debugPrint('Loading categories...');
       final categories = await categoryRepo.getCategories();
-      debugPrint('Categories loaded: ${categories.length}');
-
-      debugPrint('Loading items...');
       final items = await itemRepo.getItems();
-      debugPrint('Items loaded: ${items.length}');
 
       setState(() {
         _categories = categories;
@@ -69,21 +65,17 @@ class _LostFormScreenState extends State<LostFormScreen> {
           _location = lost.lostLocation;
           _description = lost.description;
 
-          _filteredItems = _items
-              .where((i) => i.category?.id == _categoryId)
-              .toList();
+          _filteredItems =
+              _items.where((i) => i.category?.id == _categoryId).toList();
         }
 
         _loadingData = false;
       });
-    } catch (e, stack) {
-      debugPrint('Load data error: $e');
-      debugPrint(stack.toString());
-
-      _loadingData = false;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
+    } catch (e) {
+      setState(() => _loadingData = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load data')),
+      );
     }
   }
 
@@ -114,136 +106,173 @@ class _LostFormScreenState extends State<LostFormScreen> {
 
       Navigator.pop(context, true);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => _loading = false);
     }
   }
 
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.black),
+      filled: true,
+      fillColor: Colors.white,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColor.primaryLight, width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEdit ? 'Edit Lost Item' : 'Report Lost Item'),
+      appBar: AppAppBar(
+        icon: Icons.report,
+        showBackButton: true,
+        title: isEdit ? 'Edit Lost Item' : 'Report Lost Item',
       ),
       body: _loadingData
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<int>(
-                      initialValue: _categoryId,
-                      decoration: const InputDecoration(labelText: 'Category'),
-                      items: _categories
-                          .map(
-                            (category) => DropdownMenuItem<int>(
-                              value: category.id,
-                              child: Text(category.name),
-                            ),
-                          )
-                          .toList(),
-                      validator: (v) => v == null ? 'Required' : null,
-                      onChanged: (value) {
-                        setState(() {
-                          _categoryId = value;
-                          _itemId = null;
-
-                          _filteredItems = _items
-                              .where((item) => item.category?.id == _categoryId)
-                              .toList();
-                        });
-                      },
+          : SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              DropdownButtonFormField<int>(
+                value: _categoryId,
+                decoration: _inputDecoration('Category'),
+                items: _categories
+                    .map(
+                      (category) => DropdownMenuItem<int>(
+                    value: category.id,
+                    child: Text(category.name),
+                  ),
+                )
+                    .toList(),
+                validator: (v) => v == null ? 'Required' : null,
+                onChanged: (value) {
+                  setState(() {
+                    _categoryId = value;
+                    _itemId = null;
+                    _filteredItems = _items
+                        .where((i) => i.category?.id == _categoryId)
+                        .toList();
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                value: _itemId,
+                decoration: _inputDecoration('Item'),
+                items: [
+                  ..._filteredItems.map(
+                        (item) => DropdownMenuItem<int>(
+                      value: item.id,
+                      child: Text(item.name),
                     ),
-                    const SizedBox(height: 12),
-
-                    DropdownButtonFormField<int>(
-                      initialValue: _itemId,
-                      decoration: const InputDecoration(labelText: 'Item'),
-                      items: [
-                        ..._filteredItems.map(
-                          (item) => DropdownMenuItem<int>(
-                            value: item.id,
-                            child: Text(item.name),
-                          ),
-                        ),
-                        const DropdownMenuItem<int>(
-                          value: -1,
-                          child: Text('Other / Not in list'),
-                        ),
-                      ],
-                      validator: (v) => v == null ? 'Required' : null,
-                      onChanged: (value) {
-                        setState(() {
-                          if (value == -1) {
-                            _itemId = null;
-                            _useCustomItem = true;
-                          } else {
-                            _itemId = value;
-                            _useCustomItem = false;
-                            _customItemName = null;
-                          }
-                        });
-                      },
+                  ),
+                  const DropdownMenuItem<int>(
+                    value: -1,
+                    child: Text('Other / Not in list'),
+                  ),
+                ],
+                validator: (v) => v == null ? 'Required' : null,
+                onChanged: (value) {
+                  setState(() {
+                    if (value == -1) {
+                      _itemId = null;
+                      _useCustomItem = true;
+                    } else {
+                      _itemId = value;
+                      _useCustomItem = false;
+                      _customItemName = null;
+                    }
+                  });
+                },
+              ),
+              if (_useCustomItem)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: TextFormField(
+                    decoration: _inputDecoration('Item Name'),
+                    validator: (v) {
+                      if (_useCustomItem && (v == null || v.isEmpty)) {
+                        return 'Item name is required';
+                      }
+                      return null;
+                    },
+                    onSaved: (v) => _customItemName = v,
+                  ),
+                ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: _location,
+                decoration: _inputDecoration('Lost Location'),
+                validator: (v) =>
+                v == null || v.isEmpty ? 'Required' : null,
+                onSaved: (v) => _location = v,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: _description,
+                decoration: _inputDecoration('Description'),
+                maxLines: 3,
+                onSaved: (v) => _description = v,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _loading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColor.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-
-                    if (_useCustomItem)
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Item name',
-                        ),
-                        validator: (v) {
-                          if (_useCustomItem && (v == null || v.isEmpty)) {
-                            return 'Item name is required';
-                          }
-                          return null;
-                        },
-                        onSaved: (v) => _customItemName = v,
-                      ),
-
-                    const SizedBox(height: 12),
-
-                    TextFormField(
-                      initialValue: _location,
-                      decoration: const InputDecoration(
-                        labelText: 'Lost Location',
-                      ),
-                      validator: (validate) =>
-                          validate == null || validate.isEmpty
-                          ? 'Required'
-                          : null,
-                      onSaved: (v) => _location = v,
+                    elevation: 2,
+                  ),
+                  child: _loading
+                      ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 12),
-
-                    TextFormField(
-                      initialValue: _description,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                      ),
-                      maxLines: 3,
-                      onSaved: (v) => _description = v,
+                  )
+                      : Text(
+                    isEdit ? 'Update' : 'Submit',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: 20),
-
-                    ElevatedButton(
-                      onPressed: _loading ? null : _submit,
-                      child: _loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(isEdit ? 'Update' : 'Submit'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

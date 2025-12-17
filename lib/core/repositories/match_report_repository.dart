@@ -14,6 +14,16 @@ class MatchRepository {
 
   Future<MatchReport> getMatchDetail(int id) async {
     final response = await api.get('/matches/$id');
+    print("API RESPONSE FOR MATCH $id:");
+    final itemLostData = response.data['data']['item_lost'];
+    print("Item Lost Data: $itemLostData");
+
+    // Check if 'item' key exists inside 'item_lost'
+    if (itemLostData != null && itemLostData['item'] == null) {
+      print("⚠️ CRITICAL ISSUE: The 'item' object is MISSING inside 'item_lost'.");
+      print("   This is why the name shows as 'Unknown'.");
+      print("   You must update your Backend Controller to include/join the 'item' table.");
+    }
     return MatchReport.fromJson(response.data['data']);
   }
 

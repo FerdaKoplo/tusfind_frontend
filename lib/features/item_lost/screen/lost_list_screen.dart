@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/models/item_lost_model.dart';
 import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
-import 'package:tusfind_frontend/core/widgets/item_report_card.dart';
+import 'package:tusfind_frontend/core/widgets/app_bar.dart';
+import 'package:tusfind_frontend/core/widgets/item_report_card.dart'; // Ensure this points to the new card
 import 'package:tusfind_frontend/features/item_lost/screen/lost_detail_screen.dart';
 import 'package:tusfind_frontend/features/item_lost/screen/lost_form_screen.dart';
 
@@ -22,61 +23,73 @@ class _LostListScreenState extends State<LostListScreen> {
   @override
   void initState() {
     super.initState();
-    _future = widget.repo.getLostItems();
+    _refresh();
+  }
+
+  void _refresh() {
+    setState(() {
+      _future = widget.repo.getLostItems();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor:  AppColor.primaryLight,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          spacing: 10,
-          children: const [
-            Icon(Icons.report, color: Colors.white, size: 25),
-            Text(
-              'Laporan Barang Hilang',
-              style: TextStyle(
-                color: Colors.white,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+      backgroundColor: const Color(0xFFF8F9FA), // 1. Background color makes cards pop
+      appBar: AppAppBar(
+          icon: Icons.report_gmailerrorred,
+          title: 'Laporan Barang Hilang'
       ),
-      body: Container(
-        color: AppColor.background,
-        child:  FutureBuilder<List<ItemLost>>(
-          future: _future,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      body: FutureBuilder<List<ItemLost>>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            if (snapshot.hasError) {
-              return Center(child: Text(snapshot.error.toString()));
-            }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
 
-            final items = snapshot.data!;
-            if (items.isEmpty) {
-              return const Center(child: Text('No lost items'));
-            }
-            return ListView.builder(
+          final items = snapshot.data!;
+
+          if (items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search_off_rounded, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Belum ada laporan',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600]
+                    ),
+                  ),
+                  Text(
+                    'Laporan barang hilang akan muncul disini',
+                    style: TextStyle(color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async => _refresh(),
+            child: ListView.builder(
+              padding: const EdgeInsets.only(top: 12, bottom: 80),
               itemCount: items.length,
               itemBuilder: (_, index) {
                 final lost = items[index];
 
                 return ItemReportCard(
                   title: lost.item?.name ?? 'Unknown Item',
-                  subtitle: lost.lostLocation ?? '-',
+                  location: lost.lostLocation ?? '-',
+                  category: lost.category?.name ?? 'Umum',
+                  date: "Baru saja",
                   status: lost.status,
                   onTap: () {
                     Navigator.push(
@@ -89,28 +102,33 @@ class _LostListScreenState extends State<LostListScreen> {
                   },
                 );
               },
-            );
-          },
-        ),
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColor.primaryLight,
-        onPressed: () async {
-          final created = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => LostFormScreen(repo: widget.repo),
             ),
           );
-
-          if (created == true) {
-            setState(() {
-              _future = widget.repo.getLostItems();
-            });
-          }
         },
-        child: const Icon(Icons.add, color: Colors.white,),
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 130),
+        child: FloatingActionButton.extended(
+          backgroundColor: AppColor.primary,
+          elevation: 4,
+          onPressed: () async {
+            final created = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => LostFormScreen(repo: widget.repo),
+              ),
+            );
+
+            if (created == true) {
+              _refresh();
+            }
+          },
+          icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+          label: const Text("Buat Laporan", style: TextStyle(color: Colors.white)),
+        ),
       ),
     );
   }
