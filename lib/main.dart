@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tusfind_frontend/login.dart';
+import 'package:tusfind_frontend/models/item_models.dart';
+import 'package:tusfind_frontend/pages/item_page.dart';
 import 'package:tusfind_frontend/register.dart';
+import 'package:tusfind_frontend/pages/upload_image.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +35,10 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginPage(),
+      //home: const LoginPage(),
+      //home: const RegisterPage(),
+      home: const ItemPage(type: 'lost'),
+
     );
   }
 }

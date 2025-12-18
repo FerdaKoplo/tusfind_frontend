@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tusfind_frontend/services/secure_storage.dart';
 import 'package:tusfind_frontend/services/api_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,25 +11,28 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
-  final emailC = TextEditingController();
-  final passC = TextEditingController();
+  final email = TextEditingController();
+  final pass = TextEditingController();
+void login() async {
+  if (!formKey.currentState!.validate()) return;
 
-  void login() async {
-    if (!formKey.currentState!.validate()) return;
+  final res = await ApiService.login({
+    'email': email.text,
+    'password': pass.text,
+  });
 
-    final res = await ApiService.login({
-      'email': emailC.text,
-      'password': passC.text,
-    });
+  if (res['success'] == true) {
+    await SecureStorage.saveToken(res['token']);
 
-    if (res['success'] == true) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Login Berhasil")));
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(res['message'])));
-    }
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Login Berhasil")));
+
+    Navigator.pushReplacementNamed(context, '/home');
+  } else {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(res['message'])));
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -41,23 +45,20 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               TextFormField(
-                controller: emailC,
+                controller: email,
                 decoration: InputDecoration(labelText: "Email"),
                 validator: (v) =>
                     v == null || v.isEmpty ? "Email wajib diisi" : null,
               ),
               TextFormField(
-                controller: passC,
+                controller: pass,
                 obscureText: true,
                 decoration: InputDecoration(labelText: "Password"),
                 validator: (v) =>
                     v == null || v.isEmpty ? "Password wajib diisi" : null,
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: login,
-                child: Text("Login"),
-              )
+              ElevatedButton(onPressed: login, child: Text("Login")),
             ],
           ),
         ),
