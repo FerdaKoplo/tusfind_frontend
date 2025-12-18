@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter/services.dart';
 import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
@@ -10,6 +11,13 @@ import 'package:tusfind_frontend/features/item_lost/screen/lost_list_screen.dart
 import 'package:tusfind_frontend/features/item_found/screen/found_list_screen.dart';
 import 'package:tusfind_frontend/features/match_report/screen/match_list_screen.dart';
 import 'package:tusfind_frontend/features/profile/screen/profile_stats_screen.dart';
+=======
+import 'package:tusfind_frontend/login.dart';
+import 'package:tusfind_frontend/models/item_models.dart';
+import 'package:tusfind_frontend/pages/item_page.dart';
+import 'package:tusfind_frontend/register.dart';
+import 'package:tusfind_frontend/pages/upload_image.dart';
+>>>>>>> Ariana/ItemPage_Camera
 
 void main() {
   final apiService = ApiService();
@@ -53,6 +61,13 @@ class TusFindApp extends StatelessWidget {
         matchRepo: matchRepo,
         profileRepo: profileRepo,
       ),
+<<<<<<< HEAD
+=======
+      //home: const LoginPage(),
+      //home: const RegisterPage(),
+      home: const ItemPage(type: 'lost'),
+
+>>>>>>> Ariana/ItemPage_Camera
     );
   }
 }
