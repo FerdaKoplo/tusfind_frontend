@@ -19,7 +19,7 @@ void main() {
       lostRepo: ItemLostRepository(apiService),
       foundRepo: ItemFoundRepository(apiService),
       matchRepo: MatchRepository(apiService),
-      profileRepo: ProfileRepository(apiService)
+      profileRepo: ProfileRepository(apiService),
     ),
   );
 }
@@ -62,6 +62,7 @@ class MainScreen extends StatefulWidget {
   final ItemFoundRepository foundRepo;
   final MatchRepository matchRepo;
   final ProfileRepository profileRepo;
+  // Removed the accidental extra line here
 
   const MainScreen({
     super.key,
@@ -84,10 +85,12 @@ class _MainScreenState extends State<MainScreen> {
       LostListScreen(repo: widget.lostRepo),
       FoundListScreen(repo: widget.foundRepo),
       MatchListScreen(repo: widget.matchRepo),
+
       ProfileScreen(
         profileRepo: widget.profileRepo,
         lostRepo: widget.lostRepo,
         foundRepo: widget.foundRepo,
+        matchRepo: widget.matchRepo,
       ),
     ];
 
@@ -132,7 +135,6 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Cocok',
               index: 2,
             ),
-            // 8. Add Profile Tab
             _buildNavItem(
               icon: Icons.person_rounded,
               label: 'Profil',

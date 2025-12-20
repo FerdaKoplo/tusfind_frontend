@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:tusfind_frontend/core/models/profile_model.dart';
+import 'package:tusfind_frontend/core/models/user_model.dart';
 import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
+import 'package:tusfind_frontend/core/repositories/match_report_repository.dart';
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
+import 'package:tusfind_frontend/core/utils/string_utils.dart';
 import 'package:tusfind_frontend/core/widgets/profile_stat_card.dart';
 import 'package:tusfind_frontend/features/profile/screen/my_found_reports_screen.dart';
 import 'package:tusfind_frontend/features/profile/screen/my_lost_report_screen.dart';
+import 'package:tusfind_frontend/features/profile/screen/my_matches_reports_screen.dart';
 
-// ivan
 class ProfileScreen extends StatefulWidget {
   final ProfileRepository profileRepo;
   final ItemLostRepository lostRepo;
   final ItemFoundRepository foundRepo;
+  final MatchRepository matchRepo;
 
   const ProfileScreen({
     super.key,
     required this.profileRepo,
     required this.lostRepo,
     required this.foundRepo,
+    required this.matchRepo,
   });
 
   @override
@@ -26,119 +31,197 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<ProfileStats> _statsFuture;
+  late Future<User> _userFuture;
 
   @override
   void initState() {
     super.initState();
-    _statsFuture = widget.profileRepo.getStats();
+    _refresh();
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _statsFuture = widget.profileRepo.getStats();
+      _userFuture = widget.profileRepo.getUser();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 80, bottom: 40),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade200, width: 2),
-                    ),
-                    child: const CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Color(0xFFF0F0F0),
-                      child: Icon(Icons.person, size: 50, color: Colors.grey),
-                    ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 80, bottom: 40),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(30),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "User Name",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "student@telkomuniversity.ac.id",
-                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            ),
+                ),
+                child: FutureBuilder<User>(
+                  future: _userFuture,
+                  builder: (context, snapshot) {
+                    String displayName = "Loading...";
+                    String displayEmail = "...";
+                    Widget avatarChild = const Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.grey,
+                    );
 
-            Transform.translate(
-              offset: const Offset(0, -25),
-              child: FutureBuilder<ProfileStats>(
-                future: _statsFuture,
-                builder: (context, snapshot) {
-                  final stats = snapshot.data;
-                  return ProfileStatsCard(
-                    lostCount: stats?.lostCount ?? 0,
-                    foundCount: stats?.foundCount ?? 0,
-                    resolvedCount: stats?.resolvedCount ?? 0,
-                  );
-                },
-              ),
-            ),
+                    if (snapshot.hasData) {
+                      displayName = snapshot.data!.name;
+                      displayEmail = snapshot.data!.email;
 
-            const SizedBox(height: 10),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _buildMenuTile(
-                    title: "Laporan Kehilangan Saya",
-                    subtitle: "Cek status barang yang Anda cari",
-                    icon: Icons.search_off_rounded,
-                    color: Colors.orange,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MyLostReportsScreen(repo: widget.lostRepo),
+                      // If data exists, show Initials instead of Icon
+                      avatarChild = Text(
+                        StringUtils.getInitials(displayName),
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700], // Professional dark grey
                         ),
                       );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildMenuTile(
-                    title: "Laporan Penemuan Saya",
-                    subtitle: "Barang yang Anda temukan",
-                    icon: Icons.travel_explore_rounded,
-                    color: Colors.blue,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MyFoundReportsScreen(repo: widget.foundRepo),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildMenuTile(
-                    title: "Keluar",
-                    subtitle: "Log out dari akun",
-                    icon: Icons.logout_rounded,
-                    color: Colors.red,
-                    onTap: () {
-                    },
-                  ),
-                ],
-              ),
-            ),
+                    } else if (snapshot.hasError) {
+                      displayName = "User";
+                      displayEmail = "Tap to retry";
+                    }
 
-            const SizedBox(height: 100),
-          ],
+                    return Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.shade100,
+                              width: 2,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 45,
+                            backgroundColor: const Color(0xFFF0F0F0),
+                            child:
+                                avatarChild,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          displayEmail,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+
+              Transform.translate(
+                offset: const Offset(0, -25),
+                child: FutureBuilder<ProfileStats>(
+                  future: _statsFuture,
+                  builder: (context, snapshot) {
+                    final stats = snapshot.data;
+                    return ProfileStatsCard(
+                      lostCount: stats?.lostCount ?? 0,
+                      foundCount: stats?.foundCount ?? 0,
+                      resolvedCount: stats?.resolvedCount ?? 0,
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildMenuTile(
+                      title: "Laporan Kehilangan Saya",
+                      subtitle: "Cek status barang yang Anda cari",
+                      icon: Icons.search_off_rounded,
+                      color: Colors.red,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MyLostReportsScreen(repo: widget.lostRepo),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildMenuTile(
+                      title: "Laporan Penemuan Saya",
+                      subtitle: "Barang yang Anda temukan",
+                      icon: Icons.travel_explore_rounded,
+                      color: Colors.red,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MyFoundReportsScreen(repo: widget.foundRepo),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildMenuTile(
+                      title: "Kecocokan (Matches)",
+                      subtitle: "Lihat hasil pencocokan barang Anda",
+                      icon: Icons.hub_rounded,
+                      color: Colors.red,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MyMatchesScreen(repo: widget.matchRepo),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildMenuTile(
+                      title: "Keluar",
+                      subtitle: "Log out dari akun",
+                      icon: Icons.logout_rounded,
+                      color: Colors.red,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Logout feature coming soon"),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ),
     );

@@ -9,6 +9,7 @@ class ItemReportCard extends StatelessWidget {
   final String category;
   final String date;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   const ItemReportCard({
     super.key,
@@ -18,6 +19,7 @@ class ItemReportCard extends StatelessWidget {
     required this.category,
     required this.date,
     required this.onTap,
+    this.onLongPress
   });
 
   Color _statusColor() {
@@ -53,6 +55,7 @@ class ItemReportCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
+          onLongPress: onLongPress,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
