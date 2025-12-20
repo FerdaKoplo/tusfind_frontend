@@ -18,11 +18,14 @@ class MatchRepository {
     final itemLostData = response.data['data']['item_lost'];
     print("Item Lost Data: $itemLostData");
 
-    // Check if 'item' key exists inside 'item_lost'
     if (itemLostData != null && itemLostData['item'] == null) {
-      print("⚠️ CRITICAL ISSUE: The 'item' object is MISSING inside 'item_lost'.");
+      print(
+        "⚠️ CRITICAL ISSUE: The 'item' object is MISSING inside 'item_lost'.",
+      );
       print("   This is why the name shows as 'Unknown'.");
-      print("   You must update your Backend Controller to include/join the 'item' table.");
+      print(
+        "   You must update your Backend Controller to include/join the 'item' table.",
+      );
     }
     return MatchReport.fromJson(response.data['data']);
   }
@@ -37,5 +40,18 @@ class MatchRepository {
 
   Future<void> rejectMatch(int id) async {
     await api.post('/matches/$id/reject', {});
+  }
+
+  Future<List<MatchReport>> getMyMatches({String? status}) async {
+    try {
+      final response = await api.get(
+        '/profile/matches',
+        queryParameters: {if (status != null) 'status': status},
+      );
+      final List data = response.data['data'];
+      return data.map((e) => MatchReport.fromJson(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -39,28 +39,30 @@ class ItemLostRepository {
   }
 
   Future<ItemLost> updateLostItem(
-    int id, {
-    int? categoryId,
-    int? itemId,
-    String? customItemName,
-    String? lostDate,
-    String? lostLocation,
-    String? description,
-  }) async {
+      int id, {
+        int? categoryId,
+        int? itemId,
+        String? customItemName,
+        String? lostDate,
+        String? lostLocation,
+        String? description,
+      }) async {
     final response = await api.put('/lost-items/$id', {
-      if (categoryId != null) 'category_id': categoryId,
-      if (itemId != null) 'item_id': itemId,
-      if (customItemName != null) 'custom_item_name': customItemName,
+      'category_id': categoryId,
+      'item_id': itemId,
+      'custom_item_name': customItemName,
       'lost_date': lostDate,
       'lost_location': lostLocation,
       'description': description,
     });
 
+    print("Update Item Lost Data: $response");
+
     return ItemLost.fromJson(response.data['data']);
   }
 
   Future<void> deleteLostItem(int id) async {
-    await api.post('/item-losts/$id', {'_method': 'DELETE'});
+    await api.delete('/lost-items/$id');
   }
 
   Future<List<ItemLost>> getMyLostItems({String? status, String? search}) async {
