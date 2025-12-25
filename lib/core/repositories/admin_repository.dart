@@ -10,7 +10,7 @@ class AdminRepository {
 
   Future<AdminDashboard> getDashboardStats() async {
     final response = await api.get('/admin/stats');
-    // Mengikuti pola teman Anda: response.data['data']
+   
     return AdminDashboard.fromJson(response.data['data']);
   }
   

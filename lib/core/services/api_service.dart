@@ -19,12 +19,12 @@ class ApiService {
   }
 
   // ivan
-  Future<Response> get(String endpoint, {Map<String, dynamic>? queryParameters}) async {
+  Future<Response> get(
+    String endpoint, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
-      return await _dio.get(
-        endpoint,
-        queryParameters: queryParameters,
-      );
+      return await _dio.get(endpoint, queryParameters: queryParameters);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -64,13 +64,18 @@ class ApiService {
       throw _handleError(e);
     }
   }
-}
 
-// ariana_tambah untuk admin
-Future<Response> get(String endpoint, {Map<String, dynamic>? queryParameters}) async {
-  try {
-    return await _dio.get(endpoint, queryParameters: queryParameters);
-  } on DioException catch (e) {
-    throw _handleError(e);
-  }
+  // ariana_tambah untuk admin
+  // Future<Response> get(
+  //   String endpoint, {
+  //   Map<String, dynamic>? queryParameters,
+  // }) async {
+  //   try {
+  //     return await _dio.get(endpoint, queryParameters: queryParameters);
+  //   } on DioException catch (e) {
+  //     throw _handleError(e);
+  //   }
+  // }
+// ini yang diatas yang sama kayak get punya mu diatas
+  
 }

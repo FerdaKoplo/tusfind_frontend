@@ -1,11 +1,10 @@
 // ariana
-// ini eror karena di aku gabisa manggil buat importcore dll semuanya jadinya banyak eror
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../core/services/api_service.dart';
-import '../repositories/admin_repository.dart';
-import '../models/admin_model.dart';
+import 'package:tusfind_frontend/core/services/api_service.dart';
+import 'package:tusfind_frontend/core/repositories/admin_repository.dart';
+import 'package:tusfind_frontend/core/models/admin_model.dart';
 
 class AdminScreen extends StatefulWidget {
   final String token;
