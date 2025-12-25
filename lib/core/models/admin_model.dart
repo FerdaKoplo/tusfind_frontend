@@ -32,6 +32,7 @@ class AdminDashboard {
 }
 
 // ini untuk struktur data yang ada pada admincontroller
+
 // {
 //   "status": "success",
 //   "data": {
