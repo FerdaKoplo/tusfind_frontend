@@ -170,7 +170,6 @@ class _MatchListScreenState extends State<MatchListScreen> {
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const SizedBox();
             }
-
             return FloatingActionButton.extended(
               backgroundColor: AppColor.primary,
               onPressed: _isAutoMatching ? null : _runAutoMatch,

@@ -51,7 +51,7 @@ class _FoundListScreenState extends State<FoundListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // 1. Light background for contrast
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppAppBar(
           icon: Icons.find_in_page_rounded,
           title: "Laporan Penemuan Barang"
@@ -60,7 +60,6 @@ class _FoundListScreenState extends State<FoundListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _items.isEmpty
           ? Center(
-        // 2. Improved Empty State
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -93,9 +92,8 @@ class _FoundListScreenState extends State<FoundListScreen> {
               title: item.item?.name ?? 'Unknown Item',
               location: item.foundLocation ?? '-',
               status: item.status,
-              // Assuming category exists on ItemFound, similar to ItemLost
               category: item.category?.name ?? 'Umum',
-              date: "Baru saja", // Placeholder or format your date here
+              date: "Baru saja",
               onTap: () async {
                 final refresh = await Navigator.push(
                   context,
@@ -114,7 +112,7 @@ class _FoundListScreenState extends State<FoundListScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 130), // Lifts button above navbar
+        padding: const EdgeInsets.only(bottom: 130),
         child: FloatingActionButton.extended(
           backgroundColor: AppColor.primary,
           elevation: 4,

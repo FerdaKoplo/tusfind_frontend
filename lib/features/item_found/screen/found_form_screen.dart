@@ -91,7 +91,6 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
           .where((i) => i.category?.id == categoryId)
           .toList();
 
-      // Reset item selection if category changes
       if (!isEdit || _categoryId != widget.existing?.category?.id) {
         _itemId = null;
         _useCustomItem = false;
@@ -112,7 +111,7 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
         await widget.repo.updateFoundItem(
           widget.existing!.id,
           categoryId: _categoryId,
-          itemId: _useCustomItem ? null : _itemId, // Send null if custom
+          itemId: _useCustomItem ? null : _itemId,
           customItemName: _useCustomItem ? _customItemName : null,
           foundLocation: _location,
           description: _description,
@@ -136,7 +135,6 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
     }
   }
 
-  // --- UI HELPER: Custom Text Field Container ---
   Widget _buildFieldContainer({required Widget child}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -156,7 +154,6 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
     );
   }
 
-  // --- UI HELPER: Section Title ---
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12, left: 4, top: 8),
@@ -188,10 +185,8 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- SECTION 1: ITEM DETAILS ---
               _buildSectionTitle("DETAIL BARANG"),
 
-              // Category Dropdown
               _buildFieldContainer(
                 child: DropdownButtonFormField<int>(
                   value: _categoryId,
@@ -211,10 +206,9 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
                 ),
               ),
 
-              // Item Dropdown
               _buildFieldContainer(
                 child: DropdownButtonFormField<int>(
-                  value: _itemId, // Note: Ensure _itemId is -1 if custom
+                  value: _itemId,
                   decoration: const InputDecoration(
                     labelText: 'Nama Barang',
                     icon: Icon(Icons.inventory_2_outlined, color: AppColor.primary),
@@ -236,7 +230,7 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
                       : (value) {
                     setState(() {
                       if (value == -1) {
-                        _itemId = -1; // Keep dropdown visually selecting "Other"
+                        _itemId = -1;
                         _useCustomItem = true;
                       } else {
                         _itemId = value;
@@ -249,7 +243,6 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
                 ),
               ),
 
-              // Custom Item Name Input (Animated)
               AnimatedCrossFade(
                 firstChild: const SizedBox.shrink(),
                 secondChild: _buildFieldContainer(
@@ -275,7 +268,6 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
 
               const SizedBox(height: 16),
 
-              // --- SECTION 2: LOCATION & DESCRIPTION ---
               _buildSectionTitle("LOKASI & KETERANGAN"),
 
               _buildFieldContainer(
@@ -306,13 +298,12 @@ class _FoundFormScreenState extends State<FoundFormScreen> {
                 ),
               ),
 
-              const SizedBox(height: 80), // Space for FAB
+              const SizedBox(height: 80),
             ],
           ),
         ),
       ),
 
-      // Floating Submit Button
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),

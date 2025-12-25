@@ -80,13 +80,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       displayName = snapshot.data!.name;
                       displayEmail = snapshot.data!.email;
 
-                      // If data exists, show Initials instead of Icon
                       avatarChild = Text(
                         StringUtils.getInitials(displayName),
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[700], // Professional dark grey
+                          color: Colors.grey[700],
                         ),
                       );
                     } else if (snapshot.hasError) {
