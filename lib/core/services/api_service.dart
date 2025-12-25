@@ -65,3 +65,12 @@ class ApiService {
     }
   }
 }
+
+// ariana_tambah untuk admin
+Future<Response> get(String endpoint, {Map<String, dynamic>? queryParameters}) async {
+  try {
+    return await _dio.get(endpoint, queryParameters: queryParameters);
+  } on DioException catch (e) {
+    throw _handleError(e);
+  }
+}
