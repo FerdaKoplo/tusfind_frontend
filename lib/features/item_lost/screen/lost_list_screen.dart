@@ -35,7 +35,7 @@ class _LostListScreenState extends State<LostListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // 1. Background color makes cards pop
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppAppBar(
           icon: Icons.report_gmailerrorred,
           title: 'Laporan Barang Hilang'

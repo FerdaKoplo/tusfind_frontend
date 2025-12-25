@@ -172,7 +172,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(child: Text("Terjadi kesalahan: ${snapshot.error}"));
           }
           if (!snapshot.hasData) {
             return const Center(child: Text("Match not found"));

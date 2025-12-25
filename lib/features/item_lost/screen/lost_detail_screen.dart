@@ -25,7 +25,6 @@ class LostDetailScreen extends StatelessWidget {
     }
   }
 
-  // Improved Card Design
   Widget _detailCard({
     required IconData icon,
     required String label,
@@ -48,7 +47,6 @@ class LostDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon with soft background
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -58,7 +56,6 @@ class LostDetailScreen extends StatelessWidget {
             child: Icon(icon, color: AppColor.primary, size: 24),
           ),
           const SizedBox(height: 16),
-          // Label
           Text(
             label,
             style: TextStyle(
@@ -68,7 +65,6 @@ class LostDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          // Value
           Text(
             value,
             style: const TextStyle(

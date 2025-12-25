@@ -88,7 +88,6 @@ class _FoundDetailScreenState extends State<FoundDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon Header
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -130,8 +129,6 @@ class _FoundDetailScreenState extends State<FoundDetailScreen> {
         title: 'Detail Penemuan',
         showBackButton: true,
         icon: Icons.find_in_page_rounded,
-        // actions: [
-        // ],
       ),
       body: FutureBuilder<ItemFound>(
         future: _future,

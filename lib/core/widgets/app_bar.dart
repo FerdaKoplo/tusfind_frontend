@@ -41,8 +41,6 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
             end: Alignment.bottomRight,
             colors: [
               AppColor.primaryLight,
-              // Create a slightly darker variant for the gradient end
-              // If you don't have a secondary color, standard manipulation works:
               AppColor.primaryLight.withOpacity(0.8),
             ],
           ),

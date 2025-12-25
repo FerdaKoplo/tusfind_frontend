@@ -6,6 +6,7 @@ import 'package:tusfind_frontend/core/widgets/app_bar.dart';
 import 'package:tusfind_frontend/core/widgets/match_report_card.dart';
 import 'package:tusfind_frontend/features/match_report/screen/match_detail_screen.dart';
 
+// ivan
 class MyMatchesScreen extends StatefulWidget {
   final MatchRepository repo;
   const MyMatchesScreen({super.key, required this.repo});
@@ -76,7 +77,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
+                  return Center(child: Text("Terjadi kesalahan: ${snapshot.error}"));
                 }
 
                 final matches = snapshot.data ?? [];

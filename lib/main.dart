@@ -62,7 +62,6 @@ class MainScreen extends StatefulWidget {
   final ItemFoundRepository foundRepo;
   final MatchRepository matchRepo;
   final ProfileRepository profileRepo;
-  // Removed the accidental extra line here
 
   const MainScreen({
     super.key,
