@@ -1,14 +1,11 @@
 // ariana
 
-// ariana_tambah untuk admin
-import 'package:tusfind_frontend/core/models/item_model.dart';
-
 class AdminDashboard {
   final int totalReports;
   final int lostCount;
   final int foundCount;
   final int resolvedCount;
-  final List<Item> recentActivities;
+  final List<AdminRecentActivity> recentActivities;
 
   AdminDashboard({
     required this.totalReports,
@@ -25,11 +22,38 @@ class AdminDashboard {
       foundCount: json['found_items'] ?? 0,
       resolvedCount: json['resolved_items'] ?? 0,
       recentActivities: (json['recent_activities'] as List? ?? [])
-          .map((e) => Item.fromJson(e))
+          .map((e) => AdminRecentActivity.fromJson(e))
           .toList(),
     );
   }
 }
+
+class AdminRecentActivity {
+  final int id;
+  final String name;
+  final String type; // lost / found
+  final String? brand;
+  final String? color;
+
+  AdminRecentActivity({
+    required this.id,
+    required this.name,
+    required this.type,
+    this.brand,
+    this.color,
+  });
+
+  factory AdminRecentActivity.fromJson(Map<String, dynamic> json) {
+    return AdminRecentActivity(
+      id: json['id'],
+      name: json['name'] ?? '',
+      type: json['type'] ?? '',
+      brand: json['brand'],
+      color: json['color'],
+    );
+  }
+}
+
 
 // ini untuk struktur data yang ada pada admincontroller
 
