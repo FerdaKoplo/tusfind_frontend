@@ -78,12 +78,28 @@ class _LostListScreenState extends State<LostListScreen> {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
 
+          // --- BAGIAN YANG DIPERBAIKI (MULAI) ---
+
+          // 1. Ambil data mentah dari API
           allItems = snapshot.data!;
-          if (filteredItems.isEmpty) {
-            applyFilterAndSort();
+
+          // 2. Tentukan list mana yang mau ditampilkan menggunakan variabel LOKAL
+          // Jangan panggil applyFilterAndSort() atau setState() di sini!
+          List<ItemLost> displayList = filteredItems;
+
+          // Jika filteredItems masih kosong dan kita sedang memilih 'Semua' (artinya ini load pertama),
+          // Maka kita isi displayList secara manual tanpa setState.
+          if (displayList.isEmpty && selectedCategory == 'Semua') {
+            displayList = List.from(allItems);
+            // Terapkan default sort (Terbaru) secara lokal
+            displayList.sort((a, b) => b.id.compareTo(a.id));
           }
 
-          if (filteredItems.isEmpty) {
+          // --- BAGIAN YANG DIPERBAIKI (SELESAI) ---
+
+          // Cek apakah list yang mau ditampilkan kosong
+          if (displayList.isEmpty) {
+            // Ubah filteredItems jadi displayList
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -116,72 +132,75 @@ class _LostListScreenState extends State<LostListScreen> {
             child: Column(
               children: [
                 // FILTER BAR
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: selectedCategory,
-                          items:
-                              const [
-                                    'Semua',
-                                    'Elektronik',
-                                    'Dokumen',
-                                    'Aksesoris',
-                                  ]
-                                  .map(
-                                    (e) => DropdownMenuItem(
-                                      value: e,
-                                      child: Text(e),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (value) {
-                            selectedCategory = value!;
-                            applyFilterAndSort();
-                          },
-                          decoration: const InputDecoration(
-                            labelText: 'Kategori',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: selectedSort,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Terbaru',
-                              child: Text('Terbaru'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Terlama',
-                              child: Text('Terlama'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            selectedSort = value!;
-                            applyFilterAndSort();
-                          },
-                          decoration: const InputDecoration(
-                            labelText: 'Urutkan',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.all(12),
+                //   child: Row(
+                //     children: [
+                //       Expanded(
+                //         child: DropdownButtonFormField<String>(
+                //           value: selectedCategory,
+                //           items:
+                //               const [
+                //                     'Semua',
+                //                     'Elektronik',
+                //                     'Dokumen',
+                //                     'Aksesoris',
+                //                   ]
+                //                   .map(
+                //                     (e) => DropdownMenuItem(
+                //                       value: e,
+                //                       child: Text(e),
+                //                     ),
+                //                   )
+                //                   .toList(),
+                //           onChanged: (value) {
+                //             // setState aman dipanggil di sini (karena interaksi user)
+                //             selectedCategory = value!;
+                //             applyFilterAndSort();
+                //           },
+                //           decoration: const InputDecoration(
+                //             labelText: 'Kategori',
+                //             border: OutlineInputBorder(),
+                //           ),
+                //         ),
+                //       ),
+                //       const SizedBox(width: 12),
+                //       Expanded(
+                //         child: DropdownButtonFormField<String>(
+                //           value: selectedSort,
+                //           items: const [
+                //             DropdownMenuItem(
+                //               value: 'Terbaru',
+                //               child: Text('Terbaru'),
+                //             ),
+                //             DropdownMenuItem(
+                //               value: 'Terlama',
+                //               child: Text('Terlama'),
+                //             ),
+                //           ],
+                //           onChanged: (value) {
+                //             // setState aman dipanggil di sini
+                //             selectedSort = value!;
+                //             applyFilterAndSort();
+                //           },
+                //           decoration: const InputDecoration(
+                //             labelText: 'Urutkan',
+                //             border: OutlineInputBorder(),
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
 
                 // LIST
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.only(top: 12, bottom: 80),
-                    itemCount: filteredItems.length,
+                    // Pastikan menggunakan displayList, BUKAN filteredItems
+                    itemCount: displayList.length,
                     itemBuilder: (_, index) {
-                      final lost = filteredItems[index];
+                      final lost = displayList[index]; // Pakai displayList
 
                       return ItemReportCard(
                         title: lost.item?.name ?? 'Unknown Item',

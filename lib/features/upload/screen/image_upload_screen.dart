@@ -25,7 +25,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   @override
   void initState() {
     super.initState();
-    repository = ImageUploadRepository(); // ✅ BENAR
+    repository = ImageUploadRepository();
   }
 
   Future<void> _uploadImage() async {

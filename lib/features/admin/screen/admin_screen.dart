@@ -1,4 +1,3 @@
-// ariana
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
@@ -21,7 +20,6 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   void initState() {
     super.initState();
-    // Inisialisasi service dan repo
     final apiService = ApiService(token: widget.token);
     _repository = AdminRepository(apiService);
     _dashboardFuture = _repository.getDashboardStats();
@@ -60,7 +58,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   const Text("Statistik Barang", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   
-                  // GRID STATISTIK
                   GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -80,7 +77,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   const Text("Laporan Terbaru", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
 
-                  // DAFTAR ITEM TERBARU
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -95,8 +91,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           leading: CircleAvatar(
                             backgroundColor: item.type == 'lost' ? Colors.red[50] : Colors.green[50],
                             child: Icon(
-                              item.type == 'lost' ? CupertinoIcons.frown : CupertinoIcons.smile,
-                              color: item.type == 'lost' ? Colors.red : Colors.green,
+                              item.type == 'lost' ? CupertinoIcons.search : CupertinoIcons.archivebox_fill,                              color: item.type == 'lost' ? Colors.red : Colors.green,
                               size: 20,
                             ),
                           ),

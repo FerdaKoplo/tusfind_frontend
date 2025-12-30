@@ -1,4 +1,6 @@
 // ariana
+import 'package:tusfind_frontend/core/models/user_model.dart';
+
 class LoginResponse {
   final String token;
   final User user;
@@ -16,22 +18,22 @@ class LoginResponse {
   }
 }
 
-class User {
-  final int id;
-  final String name;
-  final String email;
-
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-    );
-  }
-}
+// class User {
+//   final int id;
+//   final String name;
+//   final String email;
+//
+//   User({
+//     required this.id,
+//     required this.name,
+//     required this.email,
+//   });
+//
+//   factory User.fromJson(Map<String, dynamic> json) {
+//     return User(
+//       id: json['id'],
+//       name: json['name'],
+//       email: json['email'],
+//     );
+//   }
+// }

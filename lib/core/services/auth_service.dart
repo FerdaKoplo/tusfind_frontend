@@ -6,12 +6,10 @@ class AuthService {
   final ApiService _apiService;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  static const FlutterSecureStorage _staticStorage =
-      FlutterSecureStorage();
+  static const FlutterSecureStorage _staticStorage = FlutterSecureStorage();
 
   AuthService(this._apiService);
 
-  // REGISTER
   Future<void> register({
     required String name,
     required String email,
@@ -24,7 +22,6 @@ class AuthService {
     });
   }
 
-  // LOGIN
   Future<void> login({
     required String email,
     required String password,
@@ -41,7 +38,6 @@ class AuthService {
     await _staticStorage.write(key: 'role', value: role);
   }
 
-  // ====== UNTUK AUTH GUARD ======
   static Future<String?> getStoredToken() async {
     return await _staticStorage.read(key: 'token');
   }

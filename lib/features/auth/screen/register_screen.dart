@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:tusfind_frontend/services/api_service.dart';
-import 'login_screen.dart'; // Import halaman Login Anda
+import 'package:tusfind_frontend/core/services/api_service.dart';
+import 'package:tusfind_frontend/core/services/auth_service.dart';
+import 'login_screen.dart';
 
-// ariana
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -13,7 +13,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final formKey = GlobalKey<FormState>();
-  final name = TextEditingController(); // Tambah field nama untuk register
+  final name = TextEditingController();
   final email = TextEditingController();
   final pass = TextEditingController();
   bool isLoading = false;
@@ -24,37 +24,33 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => isLoading = true);
 
     try {
-      // Panggil fungsi register di ApiService
-      final res = await ApiService.register({
-        'name': name.text,
-        'email': email.text,
-        'password': pass.text,
-      });
+      final authService = AuthService(ApiService());
 
-      if (res['success'] == true) {
-        if (!mounted) return;
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Registrasi Berhasil! Silahkan Login."),
-            backgroundColor: Colors.green,
-          ),
-        );
+      await authService.register(
+        name: name.text,
+        email: email.text,
+        password: pass.text,
+      );
 
-        // PINDAH KE HALAMAN LOGIN
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message']), backgroundColor: Colors.red),
-        );
-      }
-    } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Terjadi kesalahan koneksi")),
+        const SnackBar(
+          content: Text("Registrasi Berhasil! Silahkan Login."),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+
+    } catch (e) {
+      String message = e.toString().replaceAll("Exception: ", "");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
     } finally {
       setState(() => isLoading = false);
@@ -90,8 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
-                
-                // Field Nama
+
                 TextFormField(
                   controller: name,
                   decoration: InputDecoration(
@@ -103,7 +98,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Field Email
                 TextFormField(
                   controller: email,
                   keyboardType: TextInputType.emailAddress,
@@ -115,8 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   validator: (v) => v == null || v.isEmpty ? "Email wajib diisi" : null,
                 ),
                 const SizedBox(height: 16),
-                
-                // Field Password
+
                 TextFormField(
                   controller: pass,
                   obscureText: true,
@@ -128,8 +121,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   validator: (v) => v == null || v.isEmpty ? "Password wajib diisi" : null,
                 ),
                 const SizedBox(height: 32),
-                
-                // Tombol Register
+
                 SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -140,12 +132,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: isLoading 
-                      ? const CupertinoActivityIndicator(color: Colors.white)
-                      : const Text("DAFTAR SEKARANG", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: isLoading
+                        ? const CupertinoActivityIndicator(color: Colors.white)
+                        : const Text("DAFTAR SEKARANG", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(

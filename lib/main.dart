@@ -2,60 +2,102 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
+import 'package:tusfind_frontend/core/services/auth_service.dart';
 import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
 import 'package:tusfind_frontend/core/repositories/match_report_repository.dart';
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
+
+// Screens
+import 'package:tusfind_frontend/features/auth/screen/login_screen.dart';
+import 'package:tusfind_frontend/features/admin/screen/admin_screen.dart';
 import 'package:tusfind_frontend/features/item_lost/screen/lost_list_screen.dart';
 import 'package:tusfind_frontend/features/item_found/screen/found_list_screen.dart';
 import 'package:tusfind_frontend/features/match_report/screen/match_list_screen.dart';
 import 'package:tusfind_frontend/features/profile/screen/profile_stats_screen.dart';
 
 void main() {
-  final apiService = ApiService();
-
-  runApp(
-    TusFindApp(
-      lostRepo: ItemLostRepository(apiService),
-      foundRepo: ItemFoundRepository(apiService),
-      matchRepo: MatchRepository(apiService),
-      profileRepo: ProfileRepository(apiService),
-    ),
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const TusFindApp());
 }
 
 class TusFindApp extends StatelessWidget {
-  final ItemLostRepository lostRepo;
-  final ItemFoundRepository foundRepo;
-  final MatchRepository matchRepo;
-  final ProfileRepository profileRepo;
-
-  const TusFindApp({
-    super.key,
-    required this.lostRepo,
-    required this.foundRepo,
-    required this.matchRepo,
-    required this.profileRepo,
-  });
+  const TusFindApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'TusFind',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFF8F9FA),
         colorScheme: ColorScheme.fromSeed(seedColor: AppColor.primary),
         useMaterial3: true,
       ),
-      home: MainScreen(
-        lostRepo: lostRepo,
-        foundRepo: foundRepo,
-        matchRepo: matchRepo,
-        profileRepo: profileRepo,
-      ),
+      home: const AuthCheck(),
     );
   }
 }
+
+class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
+  @override
+  State<AuthCheck> createState() => _AuthCheckState();
+}
+
+class _AuthCheckState extends State<AuthCheck> {
+  late Future<Map<String, String?>> _authFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _authFuture = _getAuthData();
+  }
+
+  Future<Map<String, String?>> _getAuthData() async {
+    final token = await AuthService.getStoredToken();
+    final role = await AuthService.getStoredRole();
+    return {'token': token, 'role': role};
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, String?>>(
+      future: _authFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final data = snapshot.data;
+        final token = data?['token'];
+        final role = data?['role'];
+
+        if (token != null && token.isNotEmpty) {
+
+          if (role == 'admin') {
+            return AdminScreen(token: token);
+          } else {
+            final apiService = ApiService();
+
+            return MainScreen(
+              lostRepo: ItemLostRepository(apiService),
+              foundRepo: ItemFoundRepository(apiService),
+              matchRepo: MatchRepository(apiService),
+              profileRepo: ProfileRepository(apiService),
+            );
+          }
+        }
+
+        return const LoginPage();
+      },
+    );
+  }
+}
+
 
 class MainScreen extends StatefulWidget {
   final ItemLostRepository lostRepo;
@@ -84,7 +126,6 @@ class _MainScreenState extends State<MainScreen> {
       LostListScreen(repo: widget.lostRepo),
       FoundListScreen(repo: widget.foundRepo),
       MatchListScreen(repo: widget.matchRepo),
-
       ProfileScreen(
         profileRepo: widget.profileRepo,
         lostRepo: widget.lostRepo,
