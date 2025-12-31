@@ -5,8 +5,10 @@ import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
 import 'package:tusfind_frontend/core/repositories/match_report_repository.dart';
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
+import 'package:tusfind_frontend/core/services/auth_service.dart'; // Import AuthService
 import 'package:tusfind_frontend/core/utils/string_utils.dart';
 import 'package:tusfind_frontend/core/widgets/profile_stat_card.dart';
+import 'package:tusfind_frontend/features/auth/screen/login_screen.dart'; // Import your LoginPage
 import 'package:tusfind_frontend/features/profile/screen/my_found_reports_screen.dart';
 import 'package:tusfind_frontend/features/profile/screen/my_lost_report_screen.dart';
 import 'package:tusfind_frontend/features/profile/screen/my_matches_reports_screen.dart';
@@ -44,6 +46,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _statsFuture = widget.profileRepo.getStats();
       _userFuture = widget.profileRepo.getUser();
     });
+  }
+
+  void _handleLogout() async {
+    await AuthService.logout();
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
@@ -107,8 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: CircleAvatar(
                             radius: 45,
                             backgroundColor: const Color(0xFFF0F0F0),
-                            child:
-                                avatarChild,
+                            child: avatarChild,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -206,13 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       subtitle: "Log out dari akun",
                       icon: Icons.logout_rounded,
                       color: Colors.red,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Logout feature coming soon"),
-                          ),
-                        );
-                      },
+                      onTap: _handleLogout,
                     ),
                   ],
                 ),
