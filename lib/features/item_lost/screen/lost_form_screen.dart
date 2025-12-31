@@ -69,8 +69,9 @@ class _LostFormScreenState extends State<LostFormScreen> {
           _location = lost.lostLocation;
           _description = lost.description;
 
-          _filteredItems =
-              _items.where((i) => i.category?.id == _categoryId).toList();
+          _filteredItems = _items
+              .where((i) => i.category?.id == _categoryId)
+              .toList();
 
           if (lost.item == null && lost.customItemName != null) {
             _useCustomItem = true;
@@ -84,9 +85,9 @@ class _LostFormScreenState extends State<LostFormScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _loadingData = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load data')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
       }
     }
   }
@@ -98,20 +99,34 @@ class _LostFormScreenState extends State<LostFormScreen> {
     setState(() => _loading = true);
 
     try {
+      int finalItemId;
+
+      if (_useCustomItem && _customItemName != null) {
+        final itemRepo = ItemRepository(widget.repo.api);
+
+        final newItem = await itemRepo.createItem(
+          name: _customItemName!,
+          categoryId: _categoryId,
+          brand: null,
+          color: null,
+        );
+
+        finalItemId = newItem.id;
+      } else {
+        finalItemId = _itemId!;
+      }
       if (isEdit) {
         await widget.repo.updateLostItem(
           widget.existing!.id,
           categoryId: _categoryId,
-          itemId: _useCustomItem ? null : _itemId,
-          customItemName: _useCustomItem ? _customItemName : null,
+          itemId: finalItemId,
           lostLocation: _location,
           description: _description,
         );
       } else {
         await widget.repo.createLostItem(
           categoryId: _categoryId!,
-          itemId: _useCustomItem ? null : _itemId,
-          customItemName: _useCustomItem ? _customItemName : null,
+          itemId: finalItemId,
           lostLocation: _location,
           description: _description,
         );
@@ -120,8 +135,9 @@ class _LostFormScreenState extends State<LostFormScreen> {
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -174,135 +190,166 @@ class _LostFormScreenState extends State<LostFormScreen> {
       body: _loadingData
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle("DETAIL BARANG"),
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle("DETAIL BARANG"),
 
-              _buildFieldContainer(
-                child: DropdownButtonFormField<int>(
-                  value: _categoryId,
-                  decoration: const InputDecoration(
-                    labelText: 'Kategori',
-                    icon: Icon(Icons.category_outlined, color: AppColor.primary),
-                    border: InputBorder.none,
-                  ),
-                  items: _categories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                  validator: (v) => v == null ? 'Pilih kategori' : null,
-                  onChanged: (value) {
-                    setState(() {
-                      _categoryId = value;
-                      _itemId = null;
-                      _filteredItems = _items
-                          .where((i) => i.category?.id == _categoryId)
-                          .toList();
-                    });
-                  },
-                ),
-              ),
-
-              _buildFieldContainer(
-                child: DropdownButtonFormField<int>(
-                  value: _itemId,
-                  decoration: const InputDecoration(
-                    labelText: 'Nama Barang',
-                    icon: Icon(Icons.inventory_2_outlined, color: AppColor.primary),
-                    border: InputBorder.none,
-                  ),
-                  hint: const Text("Pilih Barang"),
-                  items: [
-                    ..._filteredItems.map(
-                          (item) => DropdownMenuItem(value: item.id, child: Text(item.name)),
-                    ),
-                    const DropdownMenuItem<int>(
-                      value: -1,
-                      child: Text(
-                        '+ Lainnya / Tidak ada di list',
-                        style: TextStyle(color: AppColor.primary, fontWeight: FontWeight.bold),
+                    _buildFieldContainer(
+                      child: DropdownButtonFormField<int>(
+                        value: _categoryId,
+                        decoration: const InputDecoration(
+                          labelText: 'Kategori',
+                          icon: Icon(
+                            Icons.category_outlined,
+                            color: AppColor.primary,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        items: _categories
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            )
+                            .toList(),
+                        validator: (v) => v == null ? 'Pilih kategori' : null,
+                        onChanged: (value) {
+                          setState(() {
+                            _categoryId = value;
+                            _itemId = null;
+                            _filteredItems = _items
+                                .where((i) => i.category?.id == _categoryId)
+                                .toList();
+                          });
+                        },
                       ),
                     ),
-                  ],
-                  validator: (v) => (v == null && !_useCustomItem) ? 'Pilih barang' : null,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value == -1) {
-                        _itemId = -1;
-                        _useCustomItem = true;
-                      } else {
-                        _itemId = value;
-                        _useCustomItem = false;
-                        _customItemName = null;
-                      }
-                    });
-                  },
-                ),
-              ),
 
-              // Custom Item Name Input (Animated)
-              AnimatedCrossFade(
-                firstChild: const SizedBox.shrink(),
-                secondChild: _buildFieldContainer(
-                  child: TextFormField(
-                    initialValue: _customItemName,
-                    decoration: const InputDecoration(
-                      labelText: 'Sebutkan Nama Barang',
-                      icon: Icon(Icons.edit, color: AppColor.primary),
-                      border: InputBorder.none,
+                    _buildFieldContainer(
+                      child: DropdownButtonFormField<int>(
+                        value: _itemId,
+                        decoration: const InputDecoration(
+                          labelText: 'Nama Barang',
+                          icon: Icon(
+                            Icons.inventory_2_outlined,
+                            color: AppColor.primary,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        hint: const Text("Pilih Barang"),
+                        items: [
+                          ..._filteredItems.map(
+                            (item) => DropdownMenuItem(
+                              value: item.id,
+                              child: Text(item.name),
+                            ),
+                          ),
+                          const DropdownMenuItem<int>(
+                            value: -1,
+                            child: Text(
+                              '+ Lainnya / Tidak ada di list',
+                              style: TextStyle(
+                                color: AppColor.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                        validator: (v) => (v == null && !_useCustomItem)
+                            ? 'Pilih barang'
+                            : null,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == -1) {
+                              _itemId = -1;
+                              _useCustomItem = true;
+                            } else {
+                              _itemId = value;
+                              _useCustomItem = false;
+                              _customItemName = null;
+                            }
+                          });
+                        },
+                      ),
                     ),
-                    validator: (v) {
-                      if (_useCustomItem && (v == null || v.isEmpty)) {
-                        return 'Nama barang wajib diisi';
-                      }
-                      return null;
-                    },
-                    onSaved: (v) => _customItemName = v,
-                  ),
+
+                    // Custom Item Name Input (Animated)
+                    AnimatedCrossFade(
+                      firstChild: const SizedBox.shrink(),
+                      secondChild: _buildFieldContainer(
+                        child: TextFormField(
+                          initialValue: _customItemName,
+                          decoration: const InputDecoration(
+                            labelText: 'Sebutkan Nama Barang',
+                            icon: Icon(Icons.edit, color: AppColor.primary),
+                            border: InputBorder.none,
+                          ),
+                          validator: (v) {
+                            if (_useCustomItem && (v == null || v.isEmpty)) {
+                              return 'Nama barang wajib diisi';
+                            }
+                            return null;
+                          },
+                          onSaved: (v) => _customItemName = v,
+                        ),
+                      ),
+                      crossFadeState: _useCustomItem
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
+                      duration: const Duration(milliseconds: 300),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // --- SECTION 2: LOCATION & DESCRIPTION ---
+                    _buildSectionTitle("LOKASI & KETERANGAN"),
+
+                    _buildFieldContainer(
+                      child: TextFormField(
+                        initialValue: _location,
+                        decoration: const InputDecoration(
+                          labelText: 'Lokasi Kehilangan',
+                          hintText: "Contoh: Kantin Asrama",
+                          icon: Icon(
+                            Icons.location_off_outlined,
+                            color: AppColor.primary,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        validator: (v) => v == null || v.isEmpty
+                            ? 'Lokasi wajib diisi'
+                            : null,
+                        onSaved: (v) => _location = v,
+                      ),
+                    ),
+
+                    _buildFieldContainer(
+                      child: TextFormField(
+                        initialValue: _description,
+                        decoration: const InputDecoration(
+                          labelText: 'Deskripsi Tambahan',
+                          hintText: "Ciri-ciri, waktu kejadian, dll...",
+                          icon: Icon(
+                            Icons.description_outlined,
+                            color: AppColor.primary,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        maxLines: 4,
+                        onSaved: (v) => _description = v,
+                      ),
+                    ),
+
+                    const SizedBox(height: 80), // Space for FAB
+                  ],
                 ),
-                crossFadeState: _useCustomItem ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 300),
               ),
-
-              const SizedBox(height: 16),
-
-              // --- SECTION 2: LOCATION & DESCRIPTION ---
-              _buildSectionTitle("LOKASI & KETERANGAN"),
-
-              _buildFieldContainer(
-                child: TextFormField(
-                  initialValue: _location,
-                  decoration: const InputDecoration(
-                    labelText: 'Lokasi Kehilangan',
-                    hintText: "Contoh: Kantin Asrama",
-                    icon: Icon(Icons.location_off_outlined, color: AppColor.primary),
-                    border: InputBorder.none,
-                  ),
-                  validator: (v) => v == null || v.isEmpty ? 'Lokasi wajib diisi' : null,
-                  onSaved: (v) => _location = v,
-                ),
-              ),
-
-              _buildFieldContainer(
-                child: TextFormField(
-                  initialValue: _description,
-                  decoration: const InputDecoration(
-                    labelText: 'Deskripsi Tambahan',
-                    hintText: "Ciri-ciri, waktu kejadian, dll...",
-                    icon: Icon(Icons.description_outlined, color: AppColor.primary),
-                    border: InputBorder.none,
-                  ),
-                  maxLines: 4,
-                  onSaved: (v) => _description = v,
-                ),
-              ),
-
-              const SizedBox(height: 80), // Space for FAB
-            ],
-          ),
-        ),
-      ),
+            ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
@@ -314,24 +361,29 @@ class _LostFormScreenState extends State<LostFormScreen> {
             onPressed: _loading ? null : _submit,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColor.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               elevation: 4,
             ),
             child: _loading
                 ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-            )
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
                 : Text(
-              isEdit ? 'PERBARUI LAPORAN' : 'KIRIM LAPORAN',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 1.0,
-              ),
-            ),
+                    isEdit ? 'PERBARUI LAPORAN' : 'KIRIM LAPORAN',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:tusfind_frontend/core/repositories/match_report_repository.dart'
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
 import 'package:tusfind_frontend/core/services/auth_service.dart';
+import 'package:tusfind_frontend/features/admin/screen/admin_main_layout_screen.dart';
 import 'package:tusfind_frontend/features/admin/screen/admin_screen.dart';
 import 'package:tusfind_frontend/features/item_lost/screen/lost_list_screen.dart';
 import 'package:tusfind_frontend/features/auth/screen/register_screen.dart';
@@ -51,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => AdminScreen(token: token ?? ''),
+            builder: (context) => AdminMainLayout(token: token ?? ''),
           ),
         );
       } else {
@@ -90,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 80, 24, 40),
               decoration: BoxDecoration(
-                color: AppColor.primary, // Red Palette
+                color: AppColor.primary,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(30),
                 ),

@@ -5,11 +5,12 @@ import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
 import 'package:tusfind_frontend/core/widgets/app_bar.dart';
 import 'package:tusfind_frontend/core/widgets/item_report_card.dart';
 import 'package:tusfind_frontend/features/item_found/screen/found_detail_screen.dart';
-import 'package:tusfind_frontend/features/item_found/screen/found_form_screen.dart'; // Import Form
-import 'package:tusfind_frontend/core/repositories/category_repository.dart'; // Needed for Form
-import 'package:tusfind_frontend/core/repositories/item_repository.dart'; // Needed for Form
+import 'package:tusfind_frontend/features/item_found/screen/found_form_screen.dart';
+import 'package:tusfind_frontend/core/repositories/category_repository.dart';
+import 'package:tusfind_frontend/core/repositories/item_repository.dart';
+import 'package:tusfind_frontend/core/widgets/action_modal.dart'; // Import this
+import 'package:tusfind_frontend/core/widgets/confirmation_dialog.dart'; // Import this
 
-// ivan
 class MyFoundReportsScreen extends StatefulWidget {
   final ItemFoundRepository repo;
 
@@ -42,115 +43,39 @@ class _MyFoundReportsScreenState extends State<MyFoundReportsScreen> {
     _refresh();
   }
 
+  // --- REFACTORED: Action Menu ---
   void _showActionMenu(ItemFound item) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    height: 4,
-                    width: 40,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: Text(
-                    "Kelola Laporan",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const Divider(),
-
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.edit_rounded,
-                      color: Colors.blue.shade700,
-                      size: 22,
-                    ),
-                  ),
-                  title: const Text(
-                    "Edit Laporan",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                  subtitle: Text(
-                    "Perbarui detail informasi barang",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _handleEdit(item);
-                  },
-                ),
-
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.delete_outline_rounded,
-                      color: Colors.red.shade700,
-                      size: 22,
-                    ),
-                  ),
-                  title: const Text(
-                    "Hapus Laporan",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                  subtitle: Text(
-                    "Tindakan ini permanen",
-                    style: TextStyle(color: Colors.red[300]),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _confirmDelete(item);
-                  },
-                ),
-              ],
+        return ActionModal(
+          title: item.item?.name ?? "Item Unknown",
+          subtitle: "Laporan #${item.id}",
+          children: [
+            ActionModalOption(
+              icon: Icons.edit_rounded,
+              color: Colors.blue,
+              title: "Edit Laporan",
+              subtitle: "Perbarui detail informasi barang",
+              onTap: () {
+                Navigator.pop(context);
+                _handleEdit(item);
+              },
             ),
-          ),
+            ActionModalOption(
+              icon: Icons.delete_outline_rounded,
+              color: Colors.red,
+              title: "Hapus Laporan",
+              subtitle: "Tindakan ini permanen",
+              isDestructive: true,
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDelete(item);
+              },
+            ),
+          ],
         );
       },
     );
@@ -198,53 +123,15 @@ class _MyFoundReportsScreenState extends State<MyFoundReportsScreen> {
     }
   }
 
+  // --- REFACTORED: Confirmation Dialog ---
   Future<void> _confirmDelete(ItemFound item) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.red.shade700,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            const Text("Hapus Laporan?"),
-          ],
-        ),
-        content: const Text(
-          "Apakah Anda yakin ingin menghapus laporan ini? Data yang dihapus tidak dapat dikembalikan.",
-          style: TextStyle(fontSize: 16, color: Colors.black87),
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey[700],
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            child: const Text("Batal", style: TextStyle(fontSize: 16)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              "Ya, Hapus",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
+      builder: (context) => const ConfirmationDialog(
+        title: "Hapus Laporan?",
+        subtitle: "Apakah Anda yakin ingin menghapus laporan ini? Data yang dihapus tidak dapat dikembalikan.",
+        confirmLabel: "Ya, Hapus",
+        isDestructive: true,
       ),
     );
 

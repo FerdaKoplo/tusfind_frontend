@@ -5,9 +5,10 @@ import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
 import 'package:tusfind_frontend/core/widgets/app_bar.dart';
 import 'package:tusfind_frontend/core/widgets/item_report_card.dart';
 import 'package:tusfind_frontend/features/item_lost/screen/lost_detail_screen.dart';
-import 'package:tusfind_frontend/features/item_lost/screen/lost_form_screen.dart'; // Import the Form
+import 'package:tusfind_frontend/features/item_lost/screen/lost_form_screen.dart';
+import 'package:tusfind_frontend/core/widgets/action_modal.dart';
+import 'package:tusfind_frontend/core/widgets/confirmation_dialog.dart';
 
-// ivan
 class MyLostReportsScreen extends StatefulWidget {
   final ItemLostRepository repo;
 
@@ -43,79 +44,34 @@ class _MyLostReportsScreenState extends State<MyLostReportsScreen> {
   void _showActionMenu(ItemLost item) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 4,
-                  width: 40,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    "Kelola Laporan",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ),
-                const Divider(height: 1),
-
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.edit_rounded, color: Colors.blue, size: 20),
-                  ),
-                  title: const Text("Edit Laporan", style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text("Perbarui informasi barang"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _handleEdit(item);
-                  },
-                ),
-
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
-                  ),
-                  title: const Text("Hapus Laporan", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red)),
-                  subtitle: const Text("Data akan dihapus permanen"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _confirmDelete(item);
-                  },
-                ),
-              ],
+        return ActionModal(
+          title: item.item?.name ?? "Item Unknown",
+          children: [
+            ActionModalOption(
+              icon: Icons.edit_rounded,
+              color: Colors.blue,
+              title: "Edit Laporan",
+              subtitle: "Perbarui informasi barang",
+              onTap: () {
+                Navigator.pop(context);
+                _handleEdit(item);
+              },
             ),
-          ),
+            ActionModalOption(
+              icon: Icons.delete_outline_rounded,
+              color: Colors.red,
+              title: "Hapus Laporan",
+              subtitle: "Data akan dihapus permanen",
+              isDestructive: true,
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDelete(item);
+              },
+            ),
+          ],
         );
       },
     );
@@ -135,16 +91,12 @@ class _MyLostReportsScreenState extends State<MyLostReportsScreen> {
       _refresh();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
-              SizedBox(width: 8),
-              Text("Laporan berhasil diperbarui"),
-            ],
-          ),
+          content: const Text("Laporan berhasil diperbarui"),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }
@@ -153,40 +105,14 @@ class _MyLostReportsScreenState extends State<MyLostReportsScreen> {
   Future<void> _confirmDelete(ItemLost item) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.red),
-            SizedBox(width: 10),
-            Text("Hapus Laporan?"),
-          ],
-        ),
-        content: const Text(
-          "Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.",
-          style: TextStyle(color: Colors.black87),
-        ),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text("Batal", style: TextStyle(color: Colors.grey[600])),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text("Ya, Hapus"),
-          ),
-        ],
+      builder: (context) => const ConfirmationDialog(
+        title: "Hapus Laporan?",
+        subtitle:
+            "Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.",
+        confirmLabel: "Ya, Hapus",
+        isDestructive: true,
       ),
     );
-
 
     if (confirm == true) {
       try {
@@ -299,7 +225,6 @@ class _MyLostReportsScreenState extends State<MyLostReportsScreen> {
                             ),
                           );
                         },
-                        // Connect Long Press here
                         onLongPress: () => _showActionMenu(item),
                       );
                     },

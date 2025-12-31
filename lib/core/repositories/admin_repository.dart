@@ -1,4 +1,4 @@
-// ariana 
+// ariana
 
 import 'package:tusfind_frontend/core/services/api_service.dart';
 import '../models/admin_model.dart';
@@ -10,11 +10,8 @@ class AdminRepository {
 
   Future<AdminDashboard> getDashboardStats() async {
     final response = await api.get('/admin/stats');
-   
-    return AdminDashboard.fromJson(response.data['data']);
+
+    return AdminDashboard.fromJson(response.data);
   }
-  
-  Future<void> updateItemStatus(int id, String status) async {
-    await api.put('/admin/items/$id', {'status': status});
-  }
+
 }

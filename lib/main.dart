@@ -7,6 +7,7 @@ import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
 import 'package:tusfind_frontend/core/repositories/match_report_repository.dart';
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
+import 'package:tusfind_frontend/features/admin/screen/admin_main_layout_screen.dart';
 
 // Screens
 import 'package:tusfind_frontend/features/auth/screen/login_screen.dart';
@@ -79,7 +80,7 @@ class _AuthCheckState extends State<AuthCheck> {
         if (token != null && token.isNotEmpty) {
 
           if (role == 'admin') {
-            return AdminScreen(token: token);
+            return AdminMainLayout(token: token);
           } else {
             final apiService = ApiService();
 

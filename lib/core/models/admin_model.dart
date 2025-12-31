@@ -5,7 +5,7 @@ class AdminDashboard {
   final int lostCount;
   final int foundCount;
   final int resolvedCount;
-  final List<AdminRecentActivity> recentActivities;
+  final List<AdminActivity> recentActivities;
 
   AdminDashboard({
     required this.totalReports,
@@ -17,55 +17,44 @@ class AdminDashboard {
 
   factory AdminDashboard.fromJson(Map<String, dynamic> json) {
     return AdminDashboard(
-      totalReports: json['total_reports'] ?? 0,
-      lostCount: json['lost_items'] ?? 0,
-      foundCount: json['found_items'] ?? 0,
-      resolvedCount: json['resolved_items'] ?? 0,
-      recentActivities: (json['recent_activities'] as List? ?? [])
-          .map((e) => AdminRecentActivity.fromJson(e))
-          .toList(),
+      // Backend mengirim 'totalReports', bukan 'total_reports'
+      totalReports: json['totalReports'] ?? 0,
+      lostCount: json['lostCount'] ?? 0,
+      foundCount: json['foundCount'] ?? 0,
+      resolvedCount: json['resolvedCount'] ?? 0,
+      recentActivities: (json['recentActivities'] as List?)
+          ?.map((item) => AdminActivity.fromJson(item))
+          .toList() ??
+          [],
     );
   }
 }
 
-class AdminRecentActivity {
+class AdminActivity {
   final int id;
   final String name;
-  final String type; // lost / found
   final String? brand;
   final String? color;
+  final String type; // 'lost' atau 'found'
+  final String createdAt;
 
-  AdminRecentActivity({
+  AdminActivity({
     required this.id,
     required this.name,
-    required this.type,
     this.brand,
     this.color,
+    required this.type,
+    required this.createdAt,
   });
 
-  factory AdminRecentActivity.fromJson(Map<String, dynamic> json) {
-    return AdminRecentActivity(
-      id: json['id'],
-      name: json['name'] ?? '',
-      type: json['type'] ?? '',
+  factory AdminActivity.fromJson(Map<String, dynamic> json) {
+    return AdminActivity(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? 'Unknown',
       brand: json['brand'],
       color: json['color'],
+      type: json['type'] ?? 'lost',
+      createdAt: json['created_at'] ?? '', // Backend mengirim 'created_at' (snake_case) di dalam map function
     );
   }
 }
-
-
-// ini untuk struktur data yang ada pada admincontroller
-
-// {
-//   "status": "success",
-//   "data": {
-//     "total_reports": 100,
-//     "lost_items": 40,
-//     "found_items": 60,
-//     "resolved_items": 30,
-//     "recent_activities": [
-//       { "id": 1, "name": "Kunci", "type": "lost", "brand": "Honda", "color": "Black" }
-//     ]
-//   }
-// }
