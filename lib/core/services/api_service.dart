@@ -5,11 +5,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ApiService {
   late Dio _dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  static const String _baseUrl = "http://10.0.2.2:8000";
 
   ApiService({String? token}) {
     _dio = Dio(
       BaseOptions(
-        baseUrl: "http://10.0.2.2:8000/api",
+        baseUrl: "$_baseUrl/api",
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {
@@ -20,22 +21,24 @@ class ApiService {
     );
     _dio.interceptors.add(
       InterceptorsWrapper(
-          onRequest: (options, handler) async {
-            final token = await _storage.read(key: 'token');
+        onRequest: (options, handler) async {
+          final token = await _storage.read(key: 'token');
 
-            if (token != null) {
-              options.headers['Authorization'] = 'Bearer $token';
-            }
-
-            return handler.next(options);
-          },
-          onError: (DioException e, handler) {
-            print("API Error: ${e.response?.statusCode} - ${e.message}");
-            return handler.next(e);
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
           }
+
+          return handler.next(options);
+        },
+        onError: (DioException e, handler) {
+          print("API Error: ${e.response?.statusCode} - ${e.message}");
+          return handler.next(e);
+        },
       ),
     );
   }
+
+  String get storageUrl => "$_baseUrl/storage/";
 
   // ivan
   Future<Response> get(

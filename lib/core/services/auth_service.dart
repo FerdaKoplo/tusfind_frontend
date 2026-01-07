@@ -33,9 +33,11 @@ class AuthService {
 
     final String token = response.data['token'];
     final String role = response.data['role'];
+    final int userId = response.data['user']['id'];
 
     await _staticStorage.write(key: 'token', value: token);
     await _staticStorage.write(key: 'role', value: role);
+    await _staticStorage.write(key: 'userId', value: userId.toString());
   }
 
   static Future<String?> getStoredToken() async {
@@ -44,6 +46,11 @@ class AuthService {
 
   static Future<String?> getStoredRole() async {
     return await _staticStorage.read(key: 'role');
+  }
+
+  static Future<int?> getStoredUserId() async {
+    String? id = await _staticStorage.read(key: 'userId');
+    return id != null ? int.tryParse(id) : null;
   }
 
   static Future<void> logout() async {

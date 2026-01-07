@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:tusfind_frontend/core/constants/colors.dart'; // Ensure this is imported
+import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/repositories/item_found_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_lost_repository.dart';
 import 'package:tusfind_frontend/core/repositories/match_report_repository.dart';
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
 import 'package:tusfind_frontend/core/services/auth_service.dart';
+import 'package:tusfind_frontend/core/widgets/toast.dart';
 import 'package:tusfind_frontend/features/admin/screen/admin_main_layout_screen.dart';
 import 'package:tusfind_frontend/features/admin/screen/admin_screen.dart';
 import 'package:tusfind_frontend/features/item_lost/screen/lost_list_screen.dart';
 import 'package:tusfind_frontend/features/auth/screen/register_screen.dart';
 import 'package:tusfind_frontend/main.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -41,24 +43,24 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Login Berhasil"),
-          backgroundColor: Colors.green,
-        ),
+      TusToast.show(
+        context,
+        "Selamat datang kembali!",
+        type: ToastType.success,
       );
 
       if (role == 'admin') {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => AdminMainLayout(token: token ?? ''),
           ),
+          (route) => false,
         );
       } else {
         final apiService = ApiService();
 
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => MainScreen(
@@ -68,13 +70,13 @@ class _LoginPageState extends State<LoginPage> {
               profileRepo: ProfileRepository(apiService),
             ),
           ),
+          (route) => false,
         );
       }
     } catch (e) {
       String message = e.toString().replaceAll("Exception: ", "");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: AppColor.primary),
-      );
+
+      TusToast.show(context, message, type: ToastType.error);
     } finally {
       setState(() => isLoading = false);
     }
@@ -122,7 +124,6 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 24.0,
@@ -153,7 +154,6 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: isLoading ? null : login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColor.primary,
-                          // Red Button
                           foregroundColor: Colors.white,
                           elevation: 2,
                           shadowColor: AppColor.primary.withOpacity(0.4),

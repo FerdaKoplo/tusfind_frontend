@@ -7,6 +7,7 @@ import 'package:tusfind_frontend/core/repositories/match_report_repository.dart'
 import 'package:tusfind_frontend/core/repositories/profile_repository.dart';
 import 'package:tusfind_frontend/core/services/auth_service.dart'; // Import AuthService
 import 'package:tusfind_frontend/core/utils/string_utils.dart';
+import 'package:tusfind_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:tusfind_frontend/core/widgets/profile_stat_card.dart';
 import 'package:tusfind_frontend/features/auth/screen/login_screen.dart'; // Import your LoginPage
 import 'package:tusfind_frontend/features/profile/screen/my_found_reports_screen.dart';
@@ -49,10 +50,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleLogout() async {
+
+    bool? confirm = await showDialog(
+        context: context,
+        builder: (context) => const ConfirmationDialog(
+          title: "Logout?",
+          subtitle:
+          "Apakah anda yakin ingin keluar?.",
+          confirmLabel: "Keluar",
+          isDestructive: true,
+        )
+    );
+
+    if (confirm != true) return;
+
     await AuthService.logout();
 
     if (!mounted) return;
-
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginPage()),
       (Route<dynamic> route) => false,
@@ -69,8 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
+              Container( width: double.infinity,
                 padding: const EdgeInsets.only(top: 80, bottom: 40),
                 decoration: const BoxDecoration(
                   color: Colors.white,

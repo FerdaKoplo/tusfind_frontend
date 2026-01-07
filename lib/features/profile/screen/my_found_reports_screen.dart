@@ -8,8 +8,8 @@ import 'package:tusfind_frontend/features/item_found/screen/found_detail_screen.
 import 'package:tusfind_frontend/features/item_found/screen/found_form_screen.dart';
 import 'package:tusfind_frontend/core/repositories/category_repository.dart';
 import 'package:tusfind_frontend/core/repositories/item_repository.dart';
-import 'package:tusfind_frontend/core/widgets/action_modal.dart'; // Import this
-import 'package:tusfind_frontend/core/widgets/confirmation_dialog.dart'; // Import this
+import 'package:tusfind_frontend/core/widgets/action_modal.dart';
+import 'package:tusfind_frontend/core/widgets/confirmation_dialog.dart';
 
 class MyFoundReportsScreen extends StatefulWidget {
   final ItemFoundRepository repo;
@@ -43,7 +43,6 @@ class _MyFoundReportsScreenState extends State<MyFoundReportsScreen> {
     _refresh();
   }
 
-  // --- REFACTORED: Action Menu ---
   void _showActionMenu(ItemFound item) {
     showModalBottomSheet(
       context: context,
@@ -123,7 +122,6 @@ class _MyFoundReportsScreenState extends State<MyFoundReportsScreen> {
     }
   }
 
-  // --- REFACTORED: Confirmation Dialog ---
   Future<void> _confirmDelete(ItemFound item) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -264,6 +262,7 @@ class _MyFoundReportsScreenState extends State<MyFoundReportsScreen> {
       selected: isSelected,
       onSelected: (_) => _onFilterChanged(statusValue),
       backgroundColor: Colors.grey[100],
+
       selectedColor: AppColor.primary.withOpacity(0.2),
       labelStyle: TextStyle(
         color: isSelected ? AppColor.primary : Colors.black87,

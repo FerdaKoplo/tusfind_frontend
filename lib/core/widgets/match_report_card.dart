@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:tusfind_frontend/core/constants/colors.dart';
 
-// ivan
 class MatchReportCard extends StatelessWidget {
   final String lostItem;
   final String foundItem;
   final int score;
   final String status;
+  final bool isMine;
   final VoidCallback onTap;
 
   const MatchReportCard({
@@ -15,6 +16,7 @@ class MatchReportCard extends StatelessWidget {
     required this.score,
     required this.status,
     required this.onTap,
+    this.isMine = false,
   });
 
   Color _getScoreColor() {
@@ -37,11 +39,14 @@ class MatchReportCard extends StatelessWidget {
     final scoreColor = _getScoreColor();
     final statusColor = _getStatusColor();
 
+    final myItemColor = AppColor.success;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isMine ? myItemColor.withOpacity(0.05) : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: isMine ? Border.all(color: myItemColor.withOpacity(0.3)) : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -110,7 +115,11 @@ class MatchReportCard extends StatelessWidget {
 
                       Row(
                         children: [
-                          const Icon(Icons.help_outline, size: 16, color: Colors.grey),
+                          Icon(
+                              Icons.help_outline,
+                              size: 16,
+                              color: isMine ? Colors.black87 : Colors.grey
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
@@ -124,6 +133,14 @@ class MatchReportCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (isMine) ...[
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.person,
+                              size: 16,
+                              color: myItemColor,
+                            ),
+                          ]
                         ],
                       ),
 

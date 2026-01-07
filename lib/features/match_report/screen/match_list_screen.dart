@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/models/match_report_model.dart';
 import 'package:tusfind_frontend/core/repositories/match_report_repository.dart';
-import 'package:tusfind_frontend/core/widgets/app_bar.dart'; // Ensure this exists
-import 'package:tusfind_frontend/core/widgets/match_report_card.dart'; // Import the new card
+import 'package:tusfind_frontend/core/services/auth_service.dart'; // Import Auth Service
+import 'package:tusfind_frontend/core/widgets/app_bar.dart';
+import 'package:tusfind_frontend/core/widgets/match_report_card.dart';
+import 'package:tusfind_frontend/core/widgets/toast.dart';
 import 'package:tusfind_frontend/features/match_report/screen/match_detail_screen.dart';
 
-// ivan
 class MatchListScreen extends StatefulWidget {
   final MatchRepository repo;
 
@@ -19,11 +20,20 @@ class MatchListScreen extends StatefulWidget {
 class _MatchListScreenState extends State<MatchListScreen> {
   late Future<List<MatchReport>> _future;
   bool _isAutoMatching = false;
+  int? _currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _refresh();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final id = await AuthService.getStoredUserId();
+    if (mounted) {
+      setState(() => _currentUserId = id);
+    }
   }
 
   void _refresh() {
@@ -38,18 +48,19 @@ class _MatchListScreenState extends State<MatchListScreen> {
     try {
       await widget.repo.autoMatch();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Auto-match completed successfully"),
-            backgroundColor: Colors.green,
-          ),
+        TusToast.show(
+          context,
+          "Auto-match completed successfully!",
+          type: ToastType.success,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        TusToast.show(
           context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+          "Error: $e",
+          type: ToastType.error,
+        );
       }
     } finally {
       if (mounted) {
@@ -114,13 +125,13 @@ class _MatchListScreenState extends State<MatchListScreen> {
                     ),
                     icon: _isAutoMatching
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                         : const Icon(Icons.auto_fix_high),
                     label: Text(
                       _isAutoMatching ? "Processing..." : "Jalankan Auto Match",
@@ -139,11 +150,20 @@ class _MatchListScreenState extends State<MatchListScreen> {
               itemBuilder: (context, index) {
                 final match = matches[index];
 
+                // Check ownership
+                final bool isMine = _currentUserId != null &&
+                    _currentUserId == match.itemLost.userId;
+
                 return MatchReportCard(
-                  lostItem: match.itemLost.item?.name ?? 'Unknown Lost Item',
-                  foundItem: match.itemFound.item?.name ?? 'Unknown Found Item',
+                  lostItem: match.itemLost.item?.name ??
+                      match.itemLost.customItemName ??
+                      'Unknown Lost Item',
+                  foundItem: match.itemFound.item?.name ??
+                      match.itemFound.customItemName ??
+                      'Unknown Found Item',
                   score: match.matchScore,
                   status: match.status,
+                  isMine: isMine, // <--- Pass the new boolean
                   onTap: () {
                     Navigator.push(
                       context,
@@ -159,9 +179,8 @@ class _MatchListScreenState extends State<MatchListScreen> {
           );
         },
       ),
-
+      // ... Floating Action Button remains the same ...
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 130),
         child: FutureBuilder<List<MatchReport>>(
@@ -175,13 +194,13 @@ class _MatchListScreenState extends State<MatchListScreen> {
               onPressed: _isAutoMatching ? null : _runAutoMatch,
               icon: _isAutoMatching
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
                   : const Icon(Icons.auto_fix_high, color: Colors.white),
               label: Text(
                 _isAutoMatching ? "Scanning..." : "Auto Match",

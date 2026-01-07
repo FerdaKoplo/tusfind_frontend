@@ -107,6 +107,45 @@ class LostDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildImageSection(ItemLost item) {
+    if (item.images.isEmpty) {
+      return Container(
+        height: 250,
+        width: double.infinity,
+        color: Colors.grey[200],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.image_not_supported_outlined, size: 50, color: Colors.grey[400]),
+            const SizedBox(height: 8),
+            Text("No images available", style: TextStyle(color: Colors.grey[500])),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 280,
+      child: PageView.builder(
+        itemCount: item.images.length,
+        itemBuilder: (context, index) {
+          final imageUrl = repo.api.storageUrl + item.images[index].imagePath;
+
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 5),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Center(
+                child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,6 +175,7 @@ class LostDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -150,6 +190,11 @@ class LostDetailScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+
+
+                _buildImageSection(item),
+
 
                 const SizedBox(height: 24),
 
@@ -213,10 +258,14 @@ class LostDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 40),
               ],
+
+
             ),
           );
         },
       ),
     );
   }
+
+
 }

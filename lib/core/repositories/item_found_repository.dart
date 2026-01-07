@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:tusfind_frontend/core/models/item_found_model.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
 
@@ -25,16 +28,32 @@ class ItemFoundRepository {
     String? foundDate,
     String? foundLocation,
     String? description,
+    List<File>? images,
   }) async {
-    final response = await api.post('/found-items', {
+    FormData formData = FormData.fromMap({
       'category_id': categoryId,
       if (itemId != null) 'item_id': itemId,
       if (customItemName != null) 'custom_item_name': customItemName,
-      'found_date': foundDate,
       'found_location': foundLocation,
       'description': description,
+      'status': 'pending',
     });
 
+    if (images != null) {
+      for (var file in images) {
+        formData.files.add(
+          MapEntry(
+            'images[]',
+            await MultipartFile.fromFile(
+              file.path,
+              filename: file.path.split('/').last,
+            ),
+          ),
+        );
+      }
+    }
+
+    final response = await api.post('/found-items', formData);
     return ItemFound.fromJson(response.data['data']);
   }
 
@@ -63,7 +82,10 @@ class ItemFoundRepository {
     await api.delete('/found-items/$id');
   }
 
-  Future<List<ItemFound>> getMyFoundItems({String? status, String? search}) async {
+  Future<List<ItemFound>> getMyFoundItems({
+    String? status,
+    String? search,
+  }) async {
     try {
       final response = await api.get(
         '/profile/found-items',
