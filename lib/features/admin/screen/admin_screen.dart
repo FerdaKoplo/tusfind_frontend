@@ -5,6 +5,7 @@ import 'package:tusfind_frontend/core/services/api_service.dart';
 import 'package:tusfind_frontend/core/services/auth_service.dart';
 import 'package:tusfind_frontend/core/repositories/admin_repository.dart';
 import 'package:tusfind_frontend/core/models/admin_model.dart';
+import 'package:tusfind_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:tusfind_frontend/features/auth/screen/login_screen.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -36,20 +37,28 @@ class _AdminScreenState extends State<AdminScreen> {
   void _handleLogout() async {
     bool? confirm = await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Konfirmasi Logout"),
-        content: const Text("Apakah anda yakin ingin keluar?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Batal", style: TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Keluar", style: TextStyle(color: Colors.red)),
-          ),
-        ],
+      builder: (context) => const ConfirmationDialog(
+        title: "Logout?",
+        subtitle:
+        "Apakah anda yakin ingin keluar?.",
+        confirmLabel: "Keluar",
+        isDestructive: true,
       ),
+
+      // builder: (context) => AlertDialog(
+      //   title: const Text("Konfirmasi Logout"),
+      //   content: const Text("Apakah anda yakin ingin keluar?"),
+      //   actions: [
+      //     TextButton(
+      //       onPressed: () => Navigator.pop(context, false),
+      //       child: const Text("Batal", style: TextStyle(color: Colors.grey)),
+      //     ),
+      //     TextButton(
+      //       onPressed: () => Navigator.pop(context, true),
+      //       child: const Text("Keluar", style: TextStyle(color: Colors.red)),
+      //     ),
+      //   ],
+      // ),
     );
 
     if (confirm != true) return;

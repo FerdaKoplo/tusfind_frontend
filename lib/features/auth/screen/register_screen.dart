@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:tusfind_frontend/core/constants/colors.dart';
 import 'package:tusfind_frontend/core/services/api_service.dart';
 import 'package:tusfind_frontend/core/services/auth_service.dart';
+import 'package:tusfind_frontend/core/widgets/toast.dart';
 import 'login_screen.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -35,12 +36,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Registrasi Berhasil! Silahkan Login."),
-          backgroundColor: Colors.green,
-        ),
+      TusToast.show(
+        context,
+        "Registrasi berhasil!",
+        type: ToastType.success,
       );
+
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text("Registrasi Berhasil! Silahkan Login."),
+      //     backgroundColor: Colors.green,
+      //   ),
+      // );
 
       Navigator.pushReplacement(
         context,
@@ -49,9 +57,10 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       String message = e.toString().replaceAll("Exception: ", "");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: AppColor.primary),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text(message), backgroundColor: AppColor.primary),
+      // );
+      TusToast.show(context, message, type: ToastType.error);
     } finally {
       setState(() => isLoading = false);
     }
@@ -119,19 +128,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Mulai perjalananmu",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Daftar untuk mulai mengelola barang hilang",
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
+                    // Text(
+                    //   "Mulai perjalananmu",
+                    //   style: TextStyle(
+                    //     fontSize: 24,
+                    //     fontWeight: FontWeight.bold,
+                    //     color: Colors.grey[800],
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 8),
                     const SizedBox(height: 32),
 
                     _buildTextField(

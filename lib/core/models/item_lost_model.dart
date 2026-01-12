@@ -1,6 +1,7 @@
 import 'package:tusfind_frontend/core/models/category_model.dart';
 import 'package:tusfind_frontend/core/models/item_image_model.dart';
 import 'package:tusfind_frontend/core/models/item_model.dart';
+import 'package:tusfind_frontend/core/models/register_model.dart';
 
 // ivan
 class ItemLost {
@@ -16,6 +17,7 @@ class ItemLost {
   final Item? item;
   final List<ItemImage> images;
   final String? customItemName;
+  final User? user;
 
   ItemLost({
     required this.id,
@@ -30,15 +32,17 @@ class ItemLost {
     this.item,
     required this.images,
     this.customItemName,
+    this.user
   });
 
   factory ItemLost.fromJson(Map<String, dynamic> json) {
     return ItemLost(
-      id: json['id'],
-      userId: json['user_id'],
-      categoryId: json['category_id'],
-      itemId: json['item_id'],
-      lostDate: json['lost_date'],
+      id: json['id'] is String ? int.parse(json['id']) : json['id'],
+      userId: json['user_id'] is String ? int.parse(json['user_id']) : json['user_id'],
+      categoryId: json['category_id'] is String ? int.parse(json['category_id']) : json['category_id'],
+      itemId: json['item_id'] == null
+          ? null
+          : (json['item_id'] is String ? int.parse(json['item_id']) : json['item_id']),      lostDate: json['lost_date'],
       lostLocation: json['lost_location'],
       description: json['description'],
       status: json['status'],
@@ -51,6 +55,7 @@ class ItemLost {
           .map((e) => ItemImage.fromJson(e))
           .toList()
           : [],
+      user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
   }
 }

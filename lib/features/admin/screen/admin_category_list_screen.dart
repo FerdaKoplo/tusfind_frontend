@@ -58,10 +58,8 @@ class _AdminCategoryListScreenState extends State<AdminCategoryListScreen> {
   }
 
   void _deleteCategory(int id) async {
-    // 1. Close the modal
     Navigator.pop(context);
 
-    // 2. Show reusable confirmation dialog
     bool? confirm = await showDialog(
       context: context,
       builder: (context) => const ConfirmationDialog(
